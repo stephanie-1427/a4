@@ -151,6 +151,30 @@ def format_join(user=None, password=None, token=None):
     return join_dict
 
 
+def format_post(user_token: str = None, post: str = None, current_time: float = None):
+    '''
+    Format a post message, store and return the message as post_dict
+
+    :param user_token: The current token associated with the session.
+    :param post: The message to be sent to the server.
+    :param current_time: The timestamp for when the message is created and sent.
+    '''
+    post_dict = {"token": user_token, "post": {"entry": post, "timestamp": current_time}}
+    return post_dict
+
+
+def format_bio(user_token: str = None, bio: str = None, current_time: float = None):
+    '''
+    Format a bio message, store and return the message as bio_dict
+
+    :param user_token: The current token associated with the session.
+    :param bio: The updated or new bio to be sent to the server.
+    :param current_time: The timestamp for when the message is created and sent.
+    '''
+    bio_dict = {"token": user_token, "bio": {"entry": bio, "timestamp": current_time}}
+    return bio_dict
+
+
 def get_server_message(data: DataTuple):
     '''
     Return server message
@@ -158,6 +182,15 @@ def get_server_message(data: DataTuple):
     :param data: DataTuple of the server message "response" and "token".
     '''
     return data.response['message']
+
+
+def get_server_messages(data: DataTuple):
+    '''
+    Return server messages
+
+    :param data: DataTuple of the server message "response" and "token"
+    '''
+    return data.response['messages']
 
 
 def get_token(data: DataTuple):
