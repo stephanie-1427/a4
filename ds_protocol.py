@@ -21,19 +21,6 @@ class DSProtocolError(Exception):
     pass
 
 
-class ErrorMessage(Exception):
-    '''
-    Error for when the server returns an 'error' message type
-    '''
-    pass
-
-
-class InvalidEntry(Exception):
-    '''
-    Error for when an entry has an invalid value: None (except bio), "", or " "
-    '''
-    pass
-
 
 def extract_json(json_msg: str) -> DataTuple:
     '''
@@ -73,6 +60,8 @@ def init(sock: socket) -> DSConnection:
             timestamp=None
             )
 
+def close(ds_conn: DSConnection):
+    ds_conn.socket.close()
 
 def write(ds_conn: DSConnection, send_to_server: dict):
     '''
@@ -118,10 +107,10 @@ def read_data(server_msg: str):
     return extract_json(server_msg)
 
 
-def format_directmsg(user_token: str, message: str, recipient: str):
+def format_directmsg(user_token: str, dm_object):
     '''
     '''
-    msg_dict = {"token": user_token, "directmessage": {"entry": message, "recipient": recipient, "timestamp": time.time()}}
+    msg_dict = {"token": user_token, "directmessage": {"entry": dm_object.message, "recipient": dm_object.recipient, "timestamp": dm_object.time}}
     return msg_dict
 
 

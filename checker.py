@@ -12,6 +12,44 @@ from pathlib import Path
 class OptionTypeError(Exception):
     pass
 
+class ErrorMessage(Exception):
+    '''
+    Error for when the server returns an 'error' message type
+    '''
+    pass
+
+class InvalidEntry(Exception):
+    '''
+    Error for when an entry has an invalid value: None (except bio), "", or " "
+    '''
+    pass
+
+def check_msg_type(msg: str) -> None:
+    '''
+    Check the message type received from the server.
+    Raise a dsp.ErrorMessage if message type is 'error'
+
+    :param msg: The server message type received (either 'ok' or 'error').
+    '''
+    if msg == 'error':
+        raise ErrorMessage
+
+
+def check_valid_entry(entry) -> bool:
+    '''
+    Check the entry has a valid value.
+    Return True if entry is not "", " ", or None.
+    Raise dsp.InvalidEntry exception otherwise.
+
+    :param entry: A string or NoneType entry.
+    '''
+    if entry is not None and type(entry) is str:
+        if len(entry) != 0 and not entry.isspace():
+            return True
+        else:
+            raise InvalidEntry
+    else:
+        raise InvalidEntry
 
 def check_required_attributes(attribute: str):
     if attribute is None or len(attribute) == 0 or attribute.isspace():

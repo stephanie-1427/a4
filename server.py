@@ -22,7 +22,7 @@ DEBUG = True ##SET THIS TO FALSE IF YOU DONT WANT DEBUGGING OUTPUT
 #{user_name: {'bio':{'entry':, 'timestamp':}, 'posts':[{'entry':, 'timestamp':}]} }
 #post schema
 #posts[{'username':,'entry':, 'timestamp:']
-#messages[{'entry','from', 'timestamp','status'}] ##status can be "new" or "read"
+#messages[{'entry','from/recipient', 'timestamp','status'}] ##status can be "new" or "read". "from" denotes the user recieved the message and "recipient" denotes that they sent it 
 
 def generate_token():
     '''Randomly generate a token of the form xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'''
@@ -55,6 +55,7 @@ class DSUServer:
                 if DEBUG:
                     print(f"Message received by server: {repr(data)}")
                 direct_message_read = False
+                direct_message_sent = False
                 msg = data.decode().strip() 
                 if not msg:
                     if DEBUG:
@@ -132,8 +133,8 @@ class DSUServer:
                         else:
                             entry = command['bio']['entry']
                             #timestamp = command['bio']['timestamp']
-                            now = datetime.now()
-                            timestamp = now.strftime("%Y-%m-%d %H:%M:%S") ##SERVER GENERATES A TIMESTAMP in this format
+                            
+                            timestamp = str((datetime.now().timestamp())) ##SERVER GENERATES A TIMESTAMP in this format
                             token = command['token']
                             if token == current_user_token and token in self.sessions:
                                 current_user = self.sessions[token]
@@ -160,8 +161,8 @@ class DSUServer:
                         else:
                             entry = command['post']['entry']
                             #timestamp = command['post']['timestamp'] COMMENTED OUT TO SHOW HOW IT COULD USE YOUR PROVIDED TIMESTAMP
-                            now = datetime.now()
-                            timestamp = now.strftime("%Y-%m-%d %H:%M:%S") ##SERVER GENERATES A TIMESTAMP in this format
+                            
+                            timestamp = str((datetime.now().timestamp())) ##SERVER GENERATES A TIMESTAMP in this format
                             token = command['token']
                             if token == current_user_token and token in self.sessions:
                                 current_user = self.sessions[token]
@@ -195,13 +196,12 @@ class DSUServer:
                             if type(args) is dict:
                                 recipient = args['recipient']
                                 #timestamp = args['timestamp']
-                                now = datetime.now()
-                                timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
+                                timestamp = str((datetime.now().timestamp()))
                                 entry = args['entry']
                                 print(token, current_user_token, self.sessions)
                                 if token == current_user_token and token in self.sessions:
                                     current_user = self.sessions[token]
-                                    
+                                    direct_message_sent = True
                                     
                                     if self._send_message(entry,current_user, recipient, timestamp):
                                         message = f'Direct message sent'
@@ -219,7 +219,7 @@ class DSUServer:
                                     message = self._read_all_messages(current_user)
                                     status = 'ok'
                                 else:
-                                    message = f'Unable to send direct message'
+                                    message = f'Invalid user token.'
                                     status = 'error'
                             elif args == 'new':
                                 if token == current_user_token and token in self.sessions:
@@ -228,7 +228,7 @@ class DSUServer:
                                     message = self._read_new_messages(current_user)
                                     status = 'ok'
                                 else:
-                                    message = f'Unable to send direct message'
+                                    message = f'Invalid user token.'
                                     status = 'error'
 
                             else:
@@ -241,7 +241,9 @@ class DSUServer:
                 if DEBUG:
                     print(f'Server sending the following message: "{message}"')
                 if direct_message_read:
-                    resp = {'response': {'type':status, 'messages': message, 'token': current_user_token} }
+                    resp = {'response': {'type':status, 'messages': message} }
+                elif direct_message_sent:
+                    resp = {'response': {'type':status, 'message': message} }
                 elif status == 'ok':
                     resp = {'response': {'type':status, 'message': message, 'token': current_user_token} }
                 else:
@@ -251,7 +253,7 @@ class DSUServer:
             if current_user_token and current_user_token in self.sessions:
                 del self.sessions[current_user_token]
         except Exception as e:
-            print(f"Error handling client {client_address}: {e.with_traceback}")
+            print(f"Error handling client {client_address}: {e}")
         finally:
             client_socket.close()
             self.clients.remove(client_socket)
@@ -265,15 +267,19 @@ class DSUServer:
             with users_path.open('r') as user_file:
                 existing_users = json.load(user_file)
             
+            fetched_sender = existing_users.get(username, None)
             fetched_user = existing_users.get(recipient, None)
+            if not fetched_sender:
+                return False
             if not fetched_user:
                 return False
             
             else:
                 with users_path.open('w') as user_file:
-                    
+                    fetched_sender['messages'].append({'entry': entry, 'recipient': recipient, 'timestamp': timestamp, 'status': 'sent'})
                     fetched_user['messages'].append({'entry': entry, 'from': username, 'timestamp': timestamp, 'status': 'new'})
                     existing_users[recipient] = fetched_user
+                    existing_users[username] = fetched_sender
                     json.dump(existing_users, user_file)
         return True
 
@@ -289,9 +295,13 @@ class DSUServer:
                 return False ##double check that user exists
             result = []
             for message in fetched_user['messages']:
-                mod_message = {'from': message['from'], 'entry': message['entry'], 'timestamp': message['timestamp']}
+                if 'from' in message:
+                    mod_message = {'from': message['from'], 'entry': message['entry'], 'timestamp': message['timestamp']}
+                else:
+                    mod_message = {'recipient': message['recipient'], 'entry': message['entry'], 'timestamp': message['timestamp']}
                 result.append(mod_message)
-                message['status'] = 'read'
+                if message['status'] == 'new':
+                    message['status'] = 'read'
 
             else:
                 with users_path.open('w') as user_file:
@@ -299,7 +309,7 @@ class DSUServer:
                     existing_users[username] = fetched_user
                     json.dump(existing_users, user_file)
             
-            return sorted(result, key=lambda x: datetime.strptime(x["timestamp"], "%Y-%m-%d %H:%M:%S"))
+            return sorted(result, key=lambda x: float(x["timestamp"]))
 
     
     def _read_new_messages(self, username):
@@ -326,7 +336,7 @@ class DSUServer:
                     
                     json.dump(existing_users, user_file)
             
-            return sorted(result, key=lambda x: datetime.strptime(x["timestamp"], "%Y-%m-%d %H:%M:%S"))
+            return sorted(result, key=lambda x: float(x["timestamp"]))
 
 
 
