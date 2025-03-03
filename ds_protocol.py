@@ -4,7 +4,6 @@
 # stephl25@uci.edu
 # 79834162
 
-import time
 import json
 from collections import namedtuple
 import socket
@@ -60,8 +59,6 @@ def init(sock: socket) -> DSConnection:
             timestamp=None
             )
 
-def close(ds_conn: DSConnection):
-    ds_conn.socket.close()
 
 def write(ds_conn: DSConnection, send_to_server: dict):
     '''
@@ -97,7 +94,6 @@ def read_msg(ds_conn: DSConnection):
     return response(ds_conn)
 
 
-#TODO: fix this call
 def read_data(server_msg: str):
     '''
     Wrapper for extract_json
