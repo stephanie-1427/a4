@@ -173,6 +173,32 @@ class Profile:
     def get_posts(self) -> list[Post]:
         return self._posts
 
+
+    def make_friend(self, user: str): #added this
+        self.friends.append(user)
+    
+    def del_friend(self, user: str) -> bool:
+        try:
+            if user in self.friends:
+                self.friends.remove(user)
+            return True
+        except ValueError:
+            return False
+
+
+    def add_msg(self, msg: Message) -> None:
+        self.messages.append(msg)
+
+    def del_msg(self, index: int) -> bool:
+        try:
+            del self.messages[index]
+            return True
+        except IndexError:
+            return False
+
+    def get_messages(self) -> list[Message]:
+        return self.messages
+    
     """
 
     save_profile accepts an existing dsu file to save the current instance of Profile 
@@ -235,23 +261,3 @@ class Profile:
                 raise DsuProfileError(ex)
         else:
             raise DsuFileError()
-        
-    def make_friend(self, user: str): #added this
-        self.friends.append(user)
-'''
-
-Your program should be able to store message data locally so that when the program starts, 
-it does not have to connect to the DSP server to display previously retrieved messages. 
-Your program should also store recipient data locally so that your user does not have to 
-add the same recipients each new time the program is run 
-(for instance, you can create a new attribute in Profile containing list of "friend" usernames).
-It’s OK if you require a user to first load their dsu profile 
-(or any other custom file format you build) before displaying data. 
-The important thing here is to NOT require an internet connection to get messages that 
-were already previously retrieved.
-
-However you handle this requirement, after using your program once, 
-all recipients who were previously added and all the messages that were previously retrieved by the user, 
-should appear in your GUI (see Part 4) when it starts at any subsequent use.
-''' 
-
