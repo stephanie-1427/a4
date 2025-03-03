@@ -18,6 +18,8 @@ class DirectMessenger:
         self.dsuserver = dsuserver
         self.username = username
         self.password = password
+    
+    def start_session(self):
         self._init_socket()
         self._join()
 
@@ -62,6 +64,9 @@ class DirectMessenger:
             print(f'ERROR: {dsp.get_server_message(server_data)}')
         except Exception as e:
             print(f"Uncaught Exception: {e}")
+        else:
+            return True
+        return False
 
     def _init_socket(self):
         try:
@@ -80,6 +85,9 @@ class DirectMessenger:
             print(f'ERROR: Address-related error: {s}')
         except Exception as e:
             print(f'ERROR: Undefined error {e}')
+        else:
+            return True
+        return False
 
     def _get_response(self):
         try:

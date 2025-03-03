@@ -81,13 +81,14 @@ class Post(dict):
 
 
 class Message(dict):
-    def __init__(self, entry:str = None, timestamp:float = 0):
+    def __init__(self, user: str = None, entry:str = None, timestamp:float = 0):
         self._timestamp = timestamp
         self.set_entry(entry)
+        self.set_user(user)
 
         # Subclass dict to expose Post properties for serialization
         # Don't worry about this!
-        dict.__init__(self, entry=self._entry, timestamp=self._timestamp)
+        dict.__init__(self, user=self._user, entry=self._entry, timestamp=self._timestamp)
     
     def set_entry(self, entry):
         self._entry = entry 
@@ -96,6 +97,10 @@ class Message(dict):
         # If timestamp has not been set, generate a new from time module
         if self._timestamp == 0:
             self._timestamp = time.time()
+    
+    def set_user(self, user):
+        self._user = user
+        dict.__setitem__(self, 'user', user)
 
     def get_entry(self):
         return self._entry
@@ -254,7 +259,7 @@ class Profile:
                     post = Post(post_obj['entry'], post_obj['timestamp'])
                     self._posts.append(post)
                 for msg_obj in obj['messages']: #added this
-                    msg = Message(msg_obj['entry'], msg_obj['timestamp'])
+                    msg = Message(msg_obj['user'], msg_obj['entry'], msg_obj['timestamp'])
                     self.messages.append(msg)
                 f.close()
             except Exception as ex:

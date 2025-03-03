@@ -106,7 +106,7 @@ def read_data(server_msg: str):
 def format_directmsg(user_token: str, dm_object):
     '''
     '''
-    msg_dict = {"token": user_token, "directmessage": {"entry": dm_object.message, "recipient": dm_object.recipient, "timestamp": dm_object.time}}
+    msg_dict = {"token": user_token, "directmessage": {"entry": dm_object.message, "recipient": dm_object.recipient, "timestamp": dm_object.timestamp}}
     return msg_dict
 
 
