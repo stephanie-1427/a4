@@ -29,18 +29,15 @@ class DirectMessenger:
         dm.message = message
         dm.timestamp = time.time()
         dsp.write(self.dsp_conn, dsp.format_directmsg(self.token, dm))
-        self._get_response()
-        self._close_socket()
+        return self._get_response()
 		
     def retrieve_new(self) -> list:
         dsp.write(self.dsp_conn, dsp.format_new(self.token))
-        self._get_inbox()
-        self._close_socket()
+        return self._get_inbox()
  
     def retrieve_all(self) -> list:
         dsp.write(self.dsp_conn, dsp.format_all(self.token))
-        self._get_inbox()
-        self._close_socket()
+        return self._get_inbox()
     
     def _join(self):
         '''
@@ -93,6 +90,7 @@ class DirectMessenger:
         try:
             server_data = dsp.read_data(dsp.read_msg(self.dsp_conn))
             c.check_msg_type(dsp.get_msg_type(server_data))
+            self._close_socket()
             return True
         except c.ErrorMessage:
             print(f'ERROR: {dsp.get_server_message(server_data)}')
@@ -102,7 +100,9 @@ class DirectMessenger:
         try:
             server_data = dsp.read_data(dsp.read_msg(self.dsp_conn))
             c.check_msg_type(dsp.get_msg_type(server_data))
-            return dsp.get_server_messages(server_data)
+            self._close_socket()
+            inbox = dsp.get_server_messages(server_data)
+            return inbox
         except c.ErrorMessage:
             print(f'ERROR: {dsp.get_server_message(server_data)}')
             return None

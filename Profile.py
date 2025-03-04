@@ -90,6 +90,13 @@ class Message(dict):
         # Don't worry about this!
         dict.__init__(self, user=self._user, entry=self._entry, timestamp=self._timestamp)
     
+    def set_user(self, user):
+        self._user = user
+        dict.__setitem__(self, 'user', user)
+    
+    def get_user(self):
+        return self._user
+    
     def set_entry(self, entry):
         self._entry = entry 
         dict.__setitem__(self, 'entry', entry)
@@ -97,10 +104,6 @@ class Message(dict):
         # If timestamp has not been set, generate a new from time module
         if self._timestamp == 0:
             self._timestamp = time.time()
-    
-    def set_user(self, user):
-        self._user = user
-        dict.__setitem__(self, 'user', user)
 
     def get_entry(self):
         return self._entry
@@ -112,9 +115,9 @@ class Message(dict):
     def get_time(self):
         return self._timestamp
 
+    user = property(get_user, set_user)
     entry = property(get_entry, set_entry)
     timestamp = property(get_time, set_time)
-
 
 class Profile:
     """
