@@ -21,7 +21,7 @@ class DirectMessenger:
     
     def start_session(self):
         self._init_socket()
-        self._join()
+        return self._join()
 
     def send(self, message:str, recipient:str) -> bool:
         dm = DirectMessage()
@@ -53,8 +53,8 @@ class DirectMessenger:
                 server_data = dsp.read_data(dsp.read_msg(self.dsp_conn))
                 c.check_msg_type(dsp.get_msg_type(server_data))
                 active_token = dsp.get_token(server_data)
-                print_response(dsp.get_server_message(server_data))
                 self.token = active_token
+                return dsp.get_server_message(server_data)
         except c.InvalidEntry:
             print('ERROR: Missing parameter(s).')
         except c.ErrorMessage:

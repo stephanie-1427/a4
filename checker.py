@@ -26,6 +26,20 @@ class InvalidEntry(Exception):
     '''
     pass
 
+class InvalidRecipient(Exception):
+    pass
+
+class NotConnected(Exception):
+    pass
+
+class CancelledEvent(Exception):
+    pass
+
+class AlreadyExistsError(Exception):
+    pass
+
+class Mismatched(Exception):
+    pass
 
 def check_msg_type(msg: str) -> None:
     '''

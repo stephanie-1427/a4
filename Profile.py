@@ -43,13 +43,14 @@ class Post(dict):
     when the entry object is set and an entry property that stores the post message.
 
     """
-    def __init__(self, entry:str = None, timestamp:float = 0):
+    def __init__(self, recipient: str = None, entry: str = None, timestamp:float = 0):
         self._timestamp = timestamp
         self.set_entry(entry)
+        self.set_recipient(recipient)
 
         # Subclass dict to expose Post properties for serialization
         # Don't worry about this!
-        dict.__init__(self, entry=self._entry, timestamp=self._timestamp)
+        dict.__init__(self, recipient=self._recipient, entry=self._entry, timestamp=self._timestamp)
     
     def set_entry(self, entry):
         self._entry = entry 
@@ -68,6 +69,13 @@ class Post(dict):
     
     def get_time(self):
         return self._timestamp
+    
+    def get_recipient(self):
+        return self._recipient
+    
+    def set_recipient(self, recipient):
+        self._recipient = recipient
+        dict.__setitem__(self, 'recipient', recipient)
 
     """
 
@@ -76,34 +84,35 @@ class Post(dict):
     updated to the current time.
 
     """ 
+    recipient = property(get_recipient, set_recipient)
     entry = property(get_entry, set_entry)
     timestamp = property(get_time, set_time)
 
 
 class Message(dict):
-    def __init__(self, user: str = None, entry:str = None, timestamp:float = 0):
+    def __init__(self, entry:str = None, timestamp:float = 0, from_user: str = None, to_user: str = None):
         self._timestamp = timestamp
         self.set_entry(entry)
-        self.set_user(user)
+        self.set_to_user(to_user)
+        self.set_from_user(from_user)
 
         # Subclass dict to expose Post properties for serialization
         # Don't worry about this!
-        dict.__init__(self, user=self._user, entry=self._entry, timestamp=self._timestamp)
+        dict.__init__(self, entry=self._entry, timestamp=self._timestamp, from_user=self._from_user, to_user=self._to_user)
     
-    def set_user(self, user):
-        self._user = user
-        dict.__setitem__(self, 'user', user)
+    def set_to_user(self, to_user):
+        self._to_user = to_user
+        dict.__setitem__(self, 'to_user', to_user)
     
-    def get_user(self):
-        return self._user
+    def get_to_user(self):
+        return self._to_user
     
     def set_entry(self, entry):
         self._entry = entry 
         dict.__setitem__(self, 'entry', entry)
 
-        # If timestamp has not been set, generate a new from time module
         if self._timestamp == 0:
-            self._timestamp = time.time()
+            self._timestamp = f'{time.time()}'
 
     def get_entry(self):
         return self._entry
@@ -114,8 +123,15 @@ class Message(dict):
     
     def get_time(self):
         return self._timestamp
+    
+    def set_from_user(self, from_user):
+        self._from_user = from_user
+        dict.__setitem__(self, 'from_user', from_user)
+    
+    def get_to_user(self):
+        return self._from_user
 
-    user = property(get_user, set_user)
+    user = property(get_to_user, set_to_user)
     entry = property(get_entry, set_entry)
     timestamp = property(get_time, set_time)
 
@@ -137,9 +153,8 @@ class Profile:
         self.dsuserver = dsuserver # REQUIRED
         self.username = username # REQUIRED
         self.password = password # REQUIRED
-        self.bio = ''            # OPTIONAL
-        self._posts = []         # OPTIONAL
-        self.friends = [] # OPTIONAL
+        self._posts = []
+        self.friends = []
         self.messages = []
     
     """
@@ -256,13 +271,12 @@ class Profile:
                 self.username = obj['username']
                 self.password = obj['password']
                 self.dsuserver = obj['dsuserver']
-                self.bio = obj['bio']
                 self.friends = obj['friends'] #added
                 for post_obj in obj['_posts']:
                     post = Post(post_obj['entry'], post_obj['timestamp'])
                     self._posts.append(post)
                 for msg_obj in obj['messages']: #added this
-                    msg = Message(msg_obj['user'], msg_obj['entry'], msg_obj['timestamp'])
+                    msg = Message(msg_obj['entry'], msg_obj['timestamp'], msg_obj['from_user'], msg_obj['to_user'])
                     self.messages.append(msg)
                 f.close()
             except Exception as ex:
