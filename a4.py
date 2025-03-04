@@ -1,8 +1,18 @@
+# Stephanie Lee
+# stephl25@uci.edu
+# 79834162
+# TODO: look at todo's in code
+# TODO: take out comments when done
+# TODO: style check
+# TODO: test ds_messenger and ds_protocol modules
+# TODO: remove unused stuff from Profile.py, checker.py
+# TODO: streamline design
+
 import tkinter as tk
 from tkinter import ttk, filedialog, simpledialog
 from typing import Text
-from ds_messenger import DirectMessage, DirectMessenger
-from Profile import Profile, Message, Post
+from ds_messenger import DirectMessenger
+from Profile import Profile, Message
 import checker as c
 from pathlib import Path
 
@@ -223,7 +233,7 @@ class MainApp(tk.Frame):
             
             self.body.set_text_entry('File opened successfully.')
             self._load_contacts()
-            self.check_new()
+            self.check_new() #TODO: implement with after. Make sure messages are automatically being received
             self.is_loaded = True
         except c.NotConnected:
             self.body.set_text_entry('Please load a profile.')
