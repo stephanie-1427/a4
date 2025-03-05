@@ -276,7 +276,7 @@ class MainApp(tk.Frame):
 
     def save_messages_locally(self, msg_inbox):
         for message in msg_inbox:
-            new_msg = Message(entry=message['entry'], timestamp=message['timestamp'], from_user=message['from'])
+            new_msg = Message(entry=message['message'], timestamp=message['timestamp'], from_user=message['from'])
             self.profile.add_msg(new_msg)
             self.profile.save_profile(self.path)
 

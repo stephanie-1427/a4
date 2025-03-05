@@ -276,8 +276,8 @@ class DSUServer:
             
             else:
                 with users_path.open('w') as user_file:
-                    fetched_sender['messages'].append({'entry': entry, 'recipient': recipient, 'timestamp': timestamp, 'status': 'sent'})
-                    fetched_user['messages'].append({'entry': entry, 'from': username, 'timestamp': timestamp, 'status': 'new'})
+                    fetched_sender['messages'].append({'message': entry, 'recipient': recipient, 'timestamp': timestamp, 'status': 'sent'})
+                    fetched_user['messages'].append({'message': entry, 'from': username, 'timestamp': timestamp, 'status': 'new'})
                     existing_users[recipient] = fetched_user
                     existing_users[username] = fetched_sender
                     json.dump(existing_users, user_file)
@@ -296,9 +296,9 @@ class DSUServer:
             result = []
             for message in fetched_user['messages']:
                 if 'from' in message:
-                    mod_message = {'from': message['from'], 'entry': message['entry'], 'timestamp': message['timestamp']}
+                    mod_message = {'from': message['from'], 'message': message['message'], 'timestamp': message['timestamp']}
                 else:
-                    mod_message = {'recipient': message['recipient'], 'entry': message['entry'], 'timestamp': message['timestamp']}
+                    mod_message = {'recipient': message['recipient'], 'message': message['message'], 'timestamp': message['timestamp']}
                 result.append(mod_message)
                 if message['status'] == 'new':
                     message['status'] = 'read'
@@ -325,7 +325,7 @@ class DSUServer:
             result = []
             for message in fetched_user['messages']:
                 if message['status'] == 'new':
-                    mod_message = {'from': message['from'], 'entry': message['entry'], 'timestamp': message['timestamp']}
+                    mod_message = {'from': message['from'], 'message': message['message'], 'timestamp': message['timestamp']}
                     result.append(mod_message)
                     message['status'] = 'read'
             
