@@ -20,7 +20,6 @@ class DSProtocolError(Exception):
     pass
 
 
-
 def extract_json(json_msg: str) -> DataTuple:
     '''
     Call the json.loads function on a json string and convert it to a DataTuple object
@@ -32,7 +31,8 @@ def extract_json(json_msg: str) -> DataTuple:
         response = json_obj['response']
         type = json_obj['response']['type']
     except json.JSONDecodeError:
-        print("Json cannot be decoded.")
+        print('Json cannot be decoded.')
+        return
 
     return DataTuple(type, response)
 
@@ -72,7 +72,7 @@ def write(ds_conn: DSConnection, send_to_server: dict):
         ds_conn.send.write(json_msg + '\r\n')
         ds_conn.send.flush()
     except Exception:
-        raise DSProtocolError
+        raise DSProtocolError("Connection to write to server refused.")
 
 
 def response(ds_conn: DSConnection):
@@ -134,30 +134,6 @@ def format_join(user=None, password=None, token=None):
     '''
     join_dict = {"join": {"username": user, "password": password, "token": token}}
     return join_dict
-
-
-def format_post(user_token: str = None, post: str = None, current_time: float = None):
-    '''
-    Format a post message, store and return the message as post_dict
-
-    :param user_token: The current token associated with the session.
-    :param post: The message to be sent to the server.
-    :param current_time: The timestamp for when the message is created and sent.
-    '''
-    post_dict = {"token": user_token, "post": {"entry": post, "timestamp": current_time}}
-    return post_dict
-
-
-def format_bio(user_token: str = None, bio: str = None, current_time: float = None):
-    '''
-    Format a bio message, store and return the message as bio_dict
-
-    :param user_token: The current token associated with the session.
-    :param bio: The updated or new bio to be sent to the server.
-    :param current_time: The timestamp for when the message is created and sent.
-    '''
-    bio_dict = {"token": user_token, "bio": {"entry": bio, "timestamp": current_time}}
-    return bio_dict
 
 
 def get_server_message(data: DataTuple):

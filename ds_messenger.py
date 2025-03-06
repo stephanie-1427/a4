@@ -74,8 +74,6 @@ class DirectMessenger:
             print('ERROR: Invalid port.')
         except TypeError:
             print('ERROR: Parameter(s) of unexpected types.')
-        except dsp.DSProtocolError:
-            print('ERROR: Protocol issue')
         except ConnectionRefusedError:
             print('ERROR: Connection refused.')
         except socket.gaierror as s:
@@ -109,33 +107,3 @@ class DirectMessenger:
     
     def _close_socket(self):
         self.dsp_conn.socket.close()
-
-
-
-
-
-
-
-
-# Use later
-def print_inbox(server_messages: list):
-    '''
-    '''
-    for msg in server_messages:
-        print(f'Message: {msg["message"]}')
-        print(f'From: {msg["from"]}')
-        print(f'Sent: {msg["timestamp"]}')
-
-
-def print_response(server_message: str, client_msg: str = None) -> None:
-    '''
-    Print a response using data received from the server
-
-    :param server_message: The string message received from the server.
-    :param client_msg: The string message (post or bio) from the client.
-    :param current_token: The string value of the active token for the session.
-    '''
-    print(f'{server_message}')
-    if client_msg is not None:
-        print(f'---\n{client_msg}\n---')
-

@@ -386,7 +386,6 @@ class MainApp(tk.Frame):
         self.root['menu'] = menu_bar
         menu_file = tk.Menu(menu_bar)
 
-        #TODO: where to implement loading of files (look at text_editor.py)
         menu_bar.add_cascade(menu=menu_file, label='File')
         menu_file.add_command(label='New', command=self.configure_file)
         menu_file.add_command(label='Open...', command=self.open_file)
