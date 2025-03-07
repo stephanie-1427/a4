@@ -1,10 +1,12 @@
 # Stephanie Lee
 # stephl25@uci.edu
 # 79834162
+
 # TODO: look at todo's in code
 # TODO: take out comments when done
+# TODO: debug
 # TODO: style check
-# TODO: remove unused stuff from Profile.py, checker.py
+# TODO: remove unused stuff from checker.py
 # TODO: streamline design
 
 import tkinter as tk
@@ -247,7 +249,8 @@ class MainApp(tk.Frame):
         try:
             self.close_file()
             self.path = filedialog.askopenfilename()
-            self.profile.load_profile(self.path) #exception handling here, not dsu file, profile missing, etc
+            self.profile.load_profile(self.path)
+            #TODO: exception handling here, not dsu file, profile missing, check its existence
             if self.profile.username != self.username or self.profile.password != self.password:
                 raise c.Mismatched
             self._load_contacts()

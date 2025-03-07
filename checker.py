@@ -1,16 +1,13 @@
 # checker.py
 
 # Error checking functions
+# Custom Exceptions
 
 # Stephanie Lee
 # stephl25@uci.edu
 # 79834162
 
 from pathlib import Path
-
-
-class OptionTypeError(Exception):
-    pass
 
 
 class ErrorMessage(Exception):
@@ -80,7 +77,3 @@ def check_suffix(file_suffix):
         # File type exception
         raise TypeError
 
-
-def check_file_is_loaded(file):
-    if file is None:
-        raise FileNotFoundError

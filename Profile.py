@@ -1,19 +1,13 @@
 # Profile.py
-#
-# ICS 32
-# Assignment #2: Journal
-#
-# Author: Mark S. Baldwin, modified by Alberto Krone-Martins
-#
-# v0.1.9
 
-# You should review this code to identify what features you need to support
-# in your program for assignment 2.
-#
-# YOU DO NOT NEED TO READ OR UNDERSTAND THE JSON SERIALIZATION ASPECTS OF THIS CODE 
-# RIGHT NOW, though can you certainly take a look at it if you are curious since we 
-# already covered a bit of the JSON format in class.
-#
+# Original Author: Mark S. Baldwin, modified by Alberto Krone-Martins
+
+# Editing for a4 project use by:
+# Stephanie Lee
+# stephl25@uci.edu
+# 79834162
+
+
 import json, time
 from pathlib import Path
 
@@ -33,60 +27,6 @@ is raised when attempting to deserialize a dsu file to a Profile object.
 """
 class DsuProfileError(Exception):
     pass
-
-
-class Post(dict):
-    """ 
-
-    The Post class is responsible for working with individual user posts. It currently 
-    supports two features: A timestamp property that is set upon instantiation and 
-    when the entry object is set and an entry property that stores the post message.
-
-    """
-    def __init__(self, recipient: str = None, entry: str = None, timestamp:float = 0):
-        self._timestamp = timestamp
-        self.set_entry(entry)
-        self.set_recipient(recipient)
-
-        # Subclass dict to expose Post properties for serialization
-        # Don't worry about this!
-        dict.__init__(self, recipient=self._recipient, entry=self._entry, timestamp=self._timestamp)
-    
-    def set_entry(self, entry):
-        self._entry = entry 
-        dict.__setitem__(self, 'entry', entry)
-
-        # If timestamp has not been set, generate a new from time module
-        if self._timestamp == 0:
-            self._timestamp = time.time()
-
-    def get_entry(self):
-        return self._entry
-    
-    def set_time(self, time:float):
-        self._timestamp = time
-        dict.__setitem__(self, 'timestamp', time)
-    
-    def get_time(self):
-        return self._timestamp
-    
-    def get_recipient(self):
-        return self._recipient
-    
-    def set_recipient(self, recipient):
-        self._recipient = recipient
-        dict.__setitem__(self, 'recipient', recipient)
-
-    """
-
-    The property method is used to support get and set capability for entry and 
-    time values. When the value for entry is changed, or set, the timestamp field is 
-    updated to the current time.
-
-    """ 
-    recipient = property(get_recipient, set_recipient)
-    entry = property(get_entry, set_entry)
-    timestamp = property(get_time, set_time)
 
 
 class Message(dict):
@@ -156,50 +96,10 @@ class Profile:
         self._posts = []
         self.friends = []
         self.messages = []
-    
-    """
-
-    add_post accepts a Post object as parameter and appends it to the posts list. Posts 
-    are stored in a list object in the order they are added. So if multiple Posts objects 
-    are created, but added to the Profile in a different order, it is possible for the 
-    list to not be sorted by the Post.timestamp property. So take caution as to how you 
-    implement your add_post code.
-
-    """
-
-    def add_post(self, post: Post) -> None:
-        self._posts.append(post)
-
-    """
-
-    del_post removes a Post at a given index and returns True if successful and False if 
-    an invalid index was supplied. 
-
-    To determine which post to delete you must implement your own search operation on 
-    the posts returned from the get_posts function to find the correct index.
-
-    """
-
-    def del_post(self, index: int) -> bool:
-        try:
-            del self._posts[index]
-            return True
-        except IndexError:
-            return False
-        
-    """
-    
-    get_posts returns the list object containing all posts that have been added to the 
-    Profile object
-
-    """
-    def get_posts(self) -> list[Post]:
-        return self._posts
-
 
     def make_friend(self, user: str): #added this
         self.friends.append(user)
-    
+
     def del_friend(self, user: str) -> bool:
         try:
             if user in self.friends:
@@ -207,7 +107,6 @@ class Profile:
             return True
         except ValueError:
             return False
-
 
     def add_msg(self, msg: Message) -> None:
         self.messages.append(msg)
@@ -271,11 +170,8 @@ class Profile:
                 self.username = obj['username']
                 self.password = obj['password']
                 self.dsuserver = obj['dsuserver']
-                self.friends = obj['friends'] #added
-                for post_obj in obj['_posts']:
-                    post = Post(post_obj['entry'], post_obj['timestamp'])
-                    self._posts.append(post)
-                for msg_obj in obj['messages']: #added this
+                self.friends = obj['friends']
+                for msg_obj in obj['messages']:
                     msg = Message(msg_obj['entry'], msg_obj['timestamp'], msg_obj['from_user'], msg_obj['to_user'])
                     self.messages.append(msg)
                 f.close()
