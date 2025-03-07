@@ -4,7 +4,6 @@
 # TODO: look at todo's in code
 # TODO: take out comments when done
 # TODO: style check
-# TODO: test ds_messenger and ds_protocol modules
 # TODO: remove unused stuff from Profile.py, checker.py
 # TODO: streamline design
 
