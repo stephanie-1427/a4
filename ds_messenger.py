@@ -20,25 +20,37 @@ class DirectMessenger:
         self.password = password
     
     def start_session(self):
-        self._init_socket()
-        return self._join()
+        if self._init_socket():
+            return self._join()
 
     def send(self, message:str, recipient:str) -> bool:
-        dm = DirectMessage()
-        dm.recipient = recipient
-        dm.message = message
-        dm.timestamp = time.time()
-        dsp.write(self.dsp_conn, dsp.format_directmsg(self.token, dm))
-        return self._get_response()
+        try:
+            dm = DirectMessage()
+            dm.recipient = recipient
+            dm.message = message
+            dm.timestamp = time.time()
+            dsp.write(self.dsp_conn, dsp.format_directmsg(self.token, dm))
+            return self._get_response()
+        except dsp.DSProtocolError as dsp_error:
+            print(f'ERROR: {dsp_error}')
+            return False
 		
     def retrieve_new(self) -> list:
-        dsp.write(self.dsp_conn, dsp.format_new(self.token))
-        return self._get_inbox()
+        try:
+            dsp.write(self.dsp_conn, dsp.format_new(self.token))
+            return self._get_inbox()
+        except dsp.DSProtocolError as dsp_error:
+            print(f'ERROR: {dsp_error}')
+            return None
  
     def retrieve_all(self) -> list:
-        dsp.write(self.dsp_conn, dsp.format_all(self.token))
-        return self._get_inbox()
-    
+        try:
+            dsp.write(self.dsp_conn, dsp.format_all(self.token))
+            return self._get_inbox()
+        except dsp.DSProtocolError as dsp_error:
+            print(f'ERROR: {dsp_error}')
+            return None
+
     def _join(self):
         '''
         Send user data to the server. Receive data from the server, print a reponse.
@@ -59,10 +71,8 @@ class DirectMessenger:
             print('ERROR: Missing parameter(s).')
         except c.ErrorMessage:
             print(f'ERROR: {dsp.get_server_message(server_data)}')
-        except Exception as e:
-            print(f"Uncaught Exception: {e}")
-        else:
-            return True
+        except dsp.DSProtocolError as dsp_error:
+            print(f"ERROR: {dsp_error}")
         return False
 
     def _init_socket(self):
@@ -70,16 +80,14 @@ class DirectMessenger:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.connect((self.dsuserver, 3001))
             self.dsp_conn = dsp.init(sock)
-        except ValueError:
-            print('ERROR: Invalid port.')
         except TypeError:
             print('ERROR: Parameter(s) of unexpected types.')
         except ConnectionRefusedError:
             print('ERROR: Connection refused.')
         except socket.gaierror as s:
             print(f'ERROR: Address-related error: {s}')
-        except Exception as e:
-            print(f'ERROR: Undefined error {e}')
+        except dsp.DSProtocolError as dsp_error:
+            print(f'ERROR: {dsp_error}')
         else:
             return True
         return False
