@@ -22,7 +22,8 @@ class DSProtocolError(Exception):
 
 def extract_json(json_msg: str) -> DataTuple:
     '''
-    Call the json.loads function on a json string and convert it to a DataTuple object
+    Call the json.loads function on a json string and
+    convert it to a DataTuple object
 
     :param json_msg: The json string message to extract data from.
     '''
@@ -106,7 +107,9 @@ def read_data(server_msg: str):
 def format_directmsg(user_token: str, dm_object):
     '''
     '''
-    msg_dict = {"token": user_token, "directmessage": {"entry": dm_object.message, "recipient": dm_object.recipient, "timestamp": dm_object.timestamp}}
+    msg_dict = {"token": user_token, "directmessage": {"entry": dm_object.message,
+                                                       "recipient": dm_object.recipient,
+                                                       "timestamp": dm_object.timestamp}}
     return msg_dict
 
 
