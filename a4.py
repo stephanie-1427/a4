@@ -45,25 +45,25 @@ class Body(tk.Frame):
             entry = contact[:24] + "..."
         id = self.posts_tree.insert('', id, id, text=contact)
 
-    def insert_user_message(self, message:str):
+    def insert_user_message(self, message: str):
         self.entry_editor.insert(1.0, message + '\n', 'entry-right')
 
-    def insert_contact_message(self, message:str):
+    def insert_contact_message(self, message: str):
         self.entry_editor.insert(1.0, message + '\n', 'entry-left')
 
     def get_text_entry(self) -> str:
         return self.message_editor.get('1.0', 'end').rstrip()
 
-    def set_text_entry(self, text:str):
+    def set_text_entry(self, text: str):
         self.message_editor.delete(1.0, tk.END)
         self.message_editor.insert(1.0, text)
-    
+
     def clear_text_entry(self):
         self.message_editor.delete(1.0, tk.END)
 
     def clear_entry_editor(self):
         self.entry_editor.delete(1.0, tk.END)
-    
+
     def clear_contact_tree(self):
         to_delete = self.posts_tree.get_children()
         for tree_child in to_delete:
@@ -213,7 +213,7 @@ class MainApp(tk.Frame):
             c.check_connection(self.is_connected)
             self.close_file()
             create_file = NewFileDialog(self.root, "Configure New File",
-                                self.path, self.file_name)
+                                        self.path, self.file_name)
             c.check_cancel(create_file.path)
             c.check_cancel(create_file.file_name)
             self.path = Path(create_file.path)
@@ -297,7 +297,9 @@ class MainApp(tk.Frame):
 
     def save_messages_locally(self, msg_inbox):
         for message in msg_inbox:
-            new_msg = Message(entry=message['message'], timestamp=message['timestamp'], from_user=message['from'])
+            new_msg = Message(entry=message['message'],
+                              timestamp=message['timestamp'],
+                              from_user=message['from'])
             self.profile.add_msg(new_msg)
             self.profile.save_profile(self.path)
 
@@ -315,14 +317,16 @@ class MainApp(tk.Frame):
             message_to_send = self.body.get_text_entry()
             if c.check_valid_entry(message_to_send):
                 self.publish(message_to_send)
-                new_post = Message(entry=message_to_send, from_user=self.username, to_user=self.recipient)
+                new_post = Message(entry=message_to_send,
+                                   from_user=self.username,
+                                   to_user=self.recipient)
                 self.profile.add_msg(new_post)
                 self.profile.save_profile(self.path)
         except c.InvalidEntry:
             self.body.set_text_entry('Sending empty messages is not allowed.')
             self.body.after(2000, self.body.clear_text_entry)
 
-    def publish(self, message:str):
+    def publish(self, message: str):
         try:
             if (self.recipient == self.username) or (not self.recipient):
                 raise c.InvalidRecipient
@@ -344,14 +348,14 @@ class MainApp(tk.Frame):
             if not self.is_loaded:
                 self.body.set_text_entry('Warning: Adding a contact without loading a file. Changes will not be saved.')
 
-            new_contact = simpledialog.askstring(title="Add Contact", prompt="Enter:",)
+            new_contact = simpledialog.askstring(title="New Contact", prompt="Enter:",)
 
             c.check_cancel(new_contact)
             if new_contact in self.profile.friends:
                 raise c.AlreadyExistsError
             if new_contact == self.username:
                 raise c.InvalidRecipient
-            
+
             self.body.insert_contact(new_contact)
             if self.is_loaded:
                 self.profile.make_friend(new_contact)
@@ -379,7 +383,7 @@ class MainApp(tk.Frame):
     def configure_server(self):
         try:
             ud = NewContactDialog(self.root, "Configure Account",
-                                self.username, self.password, self.server)
+                                  self.username, self.password, self.server)
             c.check_cancel(ud.user)
             c.check_cancel(ud.pwd)
             c.check_cancel(ud.server)
@@ -392,9 +396,9 @@ class MainApp(tk.Frame):
             self.direct_messenger = DirectMessenger(self.server, self.username, self.password)
             welcome_msg = self.direct_messenger.start_session()
 
-            if welcome_msg == False:
+            if welcome_msg is False:
                 self.body.set_text_entry(f'Wrong password for {self.username}')
-            elif welcome_msg == None:
+            elif welcome_msg is None:
                 self.body.set_text_entry('A bad server was entered')
             else:
                 self.body.set_text_entry(f'{welcome_msg} Load a file to get started.')
@@ -413,7 +417,6 @@ class MainApp(tk.Frame):
         except c.NotConnected:
             self.body.set_text_entry('Please load a profile. Then load a file to save your messages and contacts.')
             self.body.after(3000, self.body.clear_text_entry)
-
 
     def _draw(self):
         # Build a menu and add it to the root frame.
