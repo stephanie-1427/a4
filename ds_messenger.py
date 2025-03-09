@@ -18,12 +18,12 @@ class DirectMessenger:
         self.dsuserver = dsuserver
         self.username = username
         self.password = password
-    
+
     def start_session(self):
         if self._init_socket():
             return self._join()
 
-    def send(self, message:str, recipient:str) -> bool:
+    def send(self, message: str, recipient: str) -> bool:
         try:
             dm = DirectMessage()
             dm.recipient = recipient
@@ -34,7 +34,7 @@ class DirectMessenger:
         except dsp.DSProtocolError as dsp_error:
             print(f'ERROR: {dsp_error}')
             return False
-		
+
     def retrieve_new(self) -> list:
         try:
             dsp.write(self.dsp_conn, dsp.format_new(self.token))
@@ -42,7 +42,7 @@ class DirectMessenger:
         except dsp.DSProtocolError as dsp_error:
             print(f'ERROR: {dsp_error}')
             return None
- 
+
     def retrieve_all(self) -> list:
         try:
             dsp.write(self.dsp_conn, dsp.format_all(self.token))
@@ -52,16 +52,15 @@ class DirectMessenger:
             return None
 
     def _join(self):
-        '''
-        Send user data to the server. Receive data from the server, print a reponse.
-        Return a server generated token to be used for command calls.
-        '''
         try:
             if self.token is None:
                 self.token = ""
-    
+
             if c.check_valid_entry(self.username) and c.check_valid_entry(self.password):
-                dsp.write(self.dsp_conn, dsp.format_join(user=self.username, password=self.password, token=self.token))
+                dsp.write(self.dsp_conn,
+                          dsp.format_join(user=self.username,
+                                          password=self.password,
+                                          token=self.token))
                 server_data = dsp.read_data(dsp.read_msg(self.dsp_conn))
                 c.check_msg_type(dsp.get_msg_type(server_data))
                 active_token = dsp.get_token(server_data)
@@ -112,6 +111,6 @@ class DirectMessenger:
         except c.ErrorMessage:
             print(f'ERROR: {dsp.get_server_message(server_data)}')
             return None
-    
+
     def _close_socket(self):
         self.dsp_conn.socket.close()
