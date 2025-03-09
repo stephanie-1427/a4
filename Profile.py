@@ -2,7 +2,7 @@
 
 # Original Author: Mark S. Baldwin, modified by Alberto Krone-Martins
 
-# Editing for a4 project use by:
+# Editing for ICS 32 a4 project use by:
 # Stephanie Lee
 # stephl25@uci.edu
 # 79834162
