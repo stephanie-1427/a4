@@ -12,16 +12,10 @@ from Profile import Profile
 
 
 class ErrorMessage(Exception):
-    '''
-    Error for when the server returns an 'error' message type
-    '''
     pass
 
 
 class InvalidEntry(Exception):
-    '''
-    Error for when an entry has an invalid value: None (except bio), "", or " "
-    '''
     pass
 
 
