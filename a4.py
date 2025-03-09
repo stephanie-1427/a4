@@ -2,7 +2,6 @@
 # stephl25@uci.edu
 # 79834162
 
-# TODO: look at todo's in code
 # TODO: take out comments when done
 # TODO: debug
 # TODO: style check
@@ -13,7 +12,7 @@ import tkinter as tk
 from tkinter import ttk, filedialog, simpledialog
 from typing import Text
 from ds_messenger import DirectMessenger
-from Profile import Profile, Message
+from Profile import Profile, Message, DsuFileError, DsuProfileError
 import checker as c
 from pathlib import Path
 
@@ -30,10 +29,11 @@ class Body(tk.Frame):
         self._draw()
 
     def node_select(self, event):
-        index = int(self.posts_tree.selection()[0])
-        entry = self._contacts[index]
-        if self._select_callback is not None:
-            self._select_callback(entry)
+        if self.posts_tree.selection():
+            index = int(self.posts_tree.selection()[0])
+            entry = self._contacts[index]
+            if self._select_callback is not None:
+                self._select_callback(entry)
 
     def insert_contact(self, contact: str):
         self._contacts.append(contact)
@@ -163,6 +163,7 @@ class NewContactDialog(tk.simpledialog.Dialog):
         self.pwd = self.password_entry.get()
         self.server = self.server_entry.get()
 
+
 class NewFileDialog(tk.simpledialog.Dialog):
     def __init__(self, root, title=None, path=None, file_name=None):
         self.root = root
@@ -187,6 +188,7 @@ class NewFileDialog(tk.simpledialog.Dialog):
         self.path = self.path_entry.get()
         self.file_name = self.file_name_entry.get()
 
+
 class MainApp(tk.Frame):
     def __init__(self, root):
         tk.Frame.__init__(self, root)
@@ -205,15 +207,15 @@ class MainApp(tk.Frame):
         self.is_loaded = False
 
         self._draw()
-        self.body.insert_contact("studentexw23") # adding one example student.
 
     def configure_file(self):
         try:
-            if not self.is_connected:
-                raise c.NotConnected
+            c.check_connection(self.is_connected)
             self.close_file()
             create_file = NewFileDialog(self.root, "Configure New File",
                                 self.path, self.file_name)
+            c.check_cancel(create_file.path)
+            c.check_cancel(create_file.file_name)
             self.path = Path(create_file.path)
             self.file_name = create_file.file_name
 
@@ -227,40 +229,56 @@ class MainApp(tk.Frame):
                 self.profile.save_profile(self.path)
             else:
                 self.body.set_text_entry('File already exists. Opening existing file...')
-            self.profile.load_profile(self.path)
+                self.path = file_path
 
-            if self.profile.username != self.username or self.profile.password != self.password:
-                raise c.Mismatched
-            
-            self.body.set_text_entry('File opened successfully.')
+            self.profile.load_profile(self.path)
+            c.check_match(self.profile, self.username, self.password)
             self._load_contacts()
-            self.check_new() #TODO: implement with after. Make sure messages are automatically being received
+            self.check_new()
+            self.body.set_text_entry('File opened.')
             self.is_loaded = True
         except c.NotConnected:
             self.body.set_text_entry('Please load a profile.')
+        except c.CancelledEvent:
+            self.body.set_text_entry('Cancelled creating a new file.')
         except c.Mismatched:
             self.body.set_text_entry('Failed to open file. File info must match the current profile.')
         except FileNotFoundError:
             self.body.set_text_entry('Could not find file/directory. Check the correctness of the directory.')
         finally:
-            self.body.after(5000, self.body.clear_text_entry)
+            self.body.after(3000, self.body.clear_text_entry)
 
     def open_file(self):
         try:
             self.close_file()
             self.path = filedialog.askopenfilename()
+
+            c.check_cancel(self.path)
+            c.check_suffix(self.path)
+            c.check_existence(self.path)
+
             self.profile.load_profile(self.path)
-            #TODO: exception handling here, not dsu file, profile missing, check its existence
-            if self.profile.username != self.username or self.profile.password != self.password:
-                raise c.Mismatched
+
+            c.check_match(self.profile, self.username, self.password)
+
             self._load_contacts()
             self.check_new()
             self.body.set_text_entry("File opened.")
             self.is_loaded = True
-        except c.Mismatched:
-            self.body.set_text_entry('Failed to open file. File info must match the current profile.')
+        except c.Mismatched as error_msg:
+            self.body.set_text_entry(f'{error_msg}')
+        except c.CancelledEvent:
+            self.body.set_text_entry('Cancelled opening file')
+        except TypeError:
+            self.body.set_text_entry('Only .dsu file types are supported.')
+        except DsuProfileError:
+            self.body.set_text_entry('File must have a Profile stored within it.')
+        except DsuFileError:
+            self.body.set_text_entry('DSU file does not exist.')
+        except FileNotFoundError:
+            self.body.set_text_entry('File was not found.')
         finally:
-            self.body.after(5000, self.body.clear_text_entry)
+            self.body.after(2000, self.body.clear_text_entry)
 
     def _load_contacts(self):
         friends = self.profile.friends
@@ -269,6 +287,7 @@ class MainApp(tk.Frame):
             self.body.insert_contact(friend)
 
     def _load_messages(self):
+        self.body.clear_entry_editor()
         all_messages = sorted(self.profile.get_messages(), key=lambda item: item['timestamp'], reverse=True)
         for message in all_messages:
             if message['from_user'] == self.recipient:
@@ -301,7 +320,7 @@ class MainApp(tk.Frame):
                 self.profile.save_profile(self.path)
         except c.InvalidEntry:
             self.body.set_text_entry('Sending empty messages is not allowed.')
-            self.body.after(5000, self.body.clear_text_entry)
+            self.body.after(2000, self.body.clear_text_entry)
 
     def publish(self, message:str):
         try:
@@ -309,27 +328,25 @@ class MainApp(tk.Frame):
                 raise c.InvalidRecipient
 
             if self.direct_messenger.send(message, self.recipient):
-                self.body.insert_user_message(message)
+                self.body.entry_editor.insert(tk.END, message, 'entry-right')
                 self.body.set_text_entry('Sent.')
             else:
                 self.body.set_text_entry('Failed to send.')
         except c.InvalidRecipient:
             self.body.set_text_entry('Please select a recipient. Note: Sending messages to yourself is unsupported.')
         finally:
-            self.body.after(5000, self.body.clear_text_entry)
+            self.body.after(3000, self.body.clear_text_entry)
 
     def add_contact(self):
         try:
-            if not self.is_connected:
-                raise c.NotConnected
+            c.check_connection(self.is_connected)
 
             if not self.is_loaded:
                 self.body.set_text_entry('Warning: Adding a contact without loading a file. Changes will not be saved.')
 
             new_contact = simpledialog.askstring(title="Add Contact", prompt="Enter:",)
 
-            if not new_contact:
-                raise c.CancelledEvent
+            c.check_cancel(new_contact)
             if new_contact in self.profile.friends:
                 raise c.AlreadyExistsError
             if new_contact == self.username:
@@ -354,32 +371,48 @@ class MainApp(tk.Frame):
     def recipient_selected(self, recipient):
         self.recipient = recipient
         self._load_messages()
+        new_inbox = self.body.after(2000, self.check_new)
+        if new_inbox != []:
+            self._load_messages()
+        self.body.mainloop()
 
     def configure_server(self):
-        ud = NewContactDialog(self.root, "Configure Account",
-                              self.username, self.password, self.server)
-        self.username = ud.user
-        self.password = ud.pwd
-        self.server = ud.server
+        try:
+            ud = NewContactDialog(self.root, "Configure Account",
+                                self.username, self.password, self.server)
+            c.check_cancel(ud.user)
+            c.check_cancel(ud.pwd)
+            c.check_cancel(ud.server)
+            self.username = ud.user
+            self.password = ud.pwd
+            self.server = ud.server
 
-        self.close_file()
+            self.close_file()
 
-        self.direct_messenger = DirectMessenger(self.server, self.username, self.password)
-        welcome_msg = self.direct_messenger.start_session()
+            self.direct_messenger = DirectMessenger(self.server, self.username, self.password)
+            welcome_msg = self.direct_messenger.start_session()
 
-        self.body.set_text_entry(f'{welcome_msg} Load a file to get started.')
-        self.is_connected = True
+            if welcome_msg == False:
+                self.body.set_text_entry(f'Wrong password for {self.username}')
+            elif welcome_msg == None:
+                self.body.set_text_entry('A bad server was entered')
+            else:
+                self.body.set_text_entry(f'{welcome_msg} Load a file to get started.')
+                self.is_connected = True
+        except c.CancelledEvent:
+            self.body.set_text_entry('Cancelled loading a profile.')
+        finally:
+            self.body.after(2000, self.body.clear_text_entry)
 
     def check_new(self):
         try:
-            if not self.is_connected:
-                raise c.NotConnected
+            c.check_connection(self.is_connected)
             inbox = self.direct_messenger.retrieve_new()
             self.save_messages_locally(inbox)
             return inbox
         except c.NotConnected:
             self.body.set_text_entry('Please load a profile. Then load a file to save your messages and contacts.')
-            self.body.after(5000, self.body.clear_text_entry)
+            self.body.after(3000, self.body.clear_text_entry)
 
 
     def _draw(self):
