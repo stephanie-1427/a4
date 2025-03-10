@@ -284,9 +284,7 @@ class MainApp(tk.Frame):
     def add_contact(self):
         try:
             c.check_connection(self.is_connected)
-
-            if not self.is_loaded:
-                self.body.set_text_entry('Warning: Adding a contact without loading a file. Changes will not be saved.')
+            c.check_connection(self.is_loaded)
 
             new_contact = simpledialog.askstring(title="New Contact", prompt="Enter:",)
 
@@ -302,7 +300,7 @@ class MainApp(tk.Frame):
                 self.profile.save_profile(self.path)
             self.body.set_text_entry(f"New contact entered: {new_contact}")
         except c.NotConnected:
-            self.body.set_text_entry('Please log in or sign up with a usernmame a password first.')
+            self.body.set_text_entry('Please log in then open a file.')
         except c.CancelledEvent:
             self.body.set_text_entry("Cancelled adding contact.")
         except c.AlreadyExistsError:
@@ -358,19 +356,24 @@ class MainApp(tk.Frame):
 
     def send_message(self):
         try:
+            c.check_connection(self.is_loaded)
+            c.check_connection(self.is_connected)
             message_to_send = self.body.get_text_entry()
             if c.check_valid_entry(message_to_send):
-                self.publish(message_to_send)
-                new_post = Message(entry=message_to_send,
-                                   from_user=self.username,
-                                   to_user=self.recipient)
-                self.profile.add_msg(new_post)
-                self.profile.save_profile(self.path)
+                if self.publish(message_to_send):
+                    new_post = Message(entry=message_to_send,
+                                    from_user=self.username,
+                                    to_user=self.recipient)
+                    self.profile.add_msg(new_post)
+                    self.profile.save_profile(self.path)
         except c.InvalidEntry:
             self.body.set_text_entry('Sending empty messages is not allowed.')
+        except c.NotConnected:
+            self.body.set_text_entry('Connect to a server and select a file to send messages.')
+        finally:
             self.body.after(2000, self.body.clear_text_entry)
 
-    def publish(self, message: str):
+    def publish(self, message: str) -> bool:
         try:
             if (self.recipient == self.username) or (not self.recipient):
                 raise c.InvalidRecipient
@@ -378,12 +381,12 @@ class MainApp(tk.Frame):
             if self.direct_messenger.send(message, self.recipient):
                 self.body.entry_editor.insert(tk.END, message + '\n', 'entry-right')
                 self.body.set_text_entry('Sent.')
+                return True
             else:
                 self.body.set_text_entry('Failed to send.')
         except c.InvalidRecipient:
             self.body.set_text_entry('Please select a recipient. Note: Sending messages to yourself is unsupported.')
-        finally:
-            self.body.after(3000, self.body.clear_text_entry)
+        return False
 
     def configure_server(self):
         try:
