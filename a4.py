@@ -2,11 +2,7 @@
 # stephl25@uci.edu
 # 79834162
 
-# TODO: take out comments when done
-# TODO: debug
-# TODO: style check
-# TODO: remove unused stuff from checker.py
-# TODO: streamline design
+# TODO: keep debugging
 
 import tkinter as tk
 from tkinter import ttk, filedialog, simpledialog
@@ -23,9 +19,7 @@ class Body(tk.Frame):
         self.root = root
         self._contacts = [str]
         self._select_callback = recipient_selected_callback
-        # After all initialization is complete,
-        # call the _draw method to pack the widgets
-        # into the Body instance
+
         self._draw()
 
     def node_select(self, event):
@@ -56,7 +50,7 @@ class Body(tk.Frame):
 
     def set_text_entry(self, text: str):
         self.message_editor.delete(1.0, tk.END)
-        self.message_editor.insert(1.0, text)
+        self.message_editor.insert(1.0, text, 'make-it-pretty')
 
     def clear_text_entry(self):
         self.message_editor.delete(1.0, tk.END)
@@ -70,7 +64,7 @@ class Body(tk.Frame):
             self.posts_tree.delete(tree_child)
 
     def _draw(self):
-        posts_frame = tk.Frame(master=self, width=250)
+        posts_frame = tk.Frame(master=self, bg='#063f02', width=250)
         posts_frame.pack(fill=tk.BOTH, side=tk.LEFT)
 
         self.posts_tree = ttk.Treeview(posts_frame)
@@ -81,30 +75,31 @@ class Body(tk.Frame):
         entry_frame = tk.Frame(master=self, bg="")
         entry_frame.pack(fill=tk.BOTH, side=tk.TOP, expand=True)
 
-        editor_frame = tk.Frame(master=entry_frame, bg="red")
+        editor_frame = tk.Frame(master=entry_frame, bg="#063f02")
         editor_frame.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
 
-        scroll_frame = tk.Frame(master=entry_frame, bg="blue", width=10)
+        scroll_frame = tk.Frame(master=entry_frame, bg="#063f02", width=10)
         scroll_frame.pack(fill=tk.BOTH, side=tk.LEFT, expand=False)
 
-        message_frame = tk.Frame(master=self, bg="yellow")
+        message_frame = tk.Frame(master=self, bg="#063f02")
         message_frame.pack(fill=tk.BOTH, side=tk.TOP, expand=False)
 
         self.message_editor = tk.Text(message_frame, width=0, height=5)
+        self.message_editor.tag_configure('make-it-pretty', foreground='#063f02', font=('Mincho', 10, 'bold'))
         self.message_editor.pack(fill=tk.BOTH, side=tk.LEFT,
-                                 expand=True, padx=0, pady=0)
+                                 expand=True, padx=5, pady=5)
 
         self.entry_editor = tk.Text(editor_frame, width=0, height=5)
-        self.entry_editor.tag_configure('entry-right', justify='right')
-        self.entry_editor.tag_configure('entry-left', justify='left')
+        self.entry_editor.tag_configure('entry-right', justify='right', background='#c98a3e', font=('Mincho', 10, 'bold'))
+        self.entry_editor.tag_configure('entry-left', justify='left', background='#eeab50', font=('Mincho', 10, 'bold'))
         self.entry_editor.pack(fill=tk.BOTH, side=tk.LEFT,
-                               expand=True, padx=0, pady=0)
+                               expand=True, padx=5, pady=5)
 
         entry_editor_scrollbar = tk.Scrollbar(master=scroll_frame,
                                               command=self.entry_editor.yview)
         self.entry_editor['yscrollcommand'] = entry_editor_scrollbar.set
         entry_editor_scrollbar.pack(fill=tk.Y, side=tk.LEFT,
-                                    expand=False, padx=0, pady=0)
+                                    expand=False, padx=2, pady=2)
 
 
 class Footer(tk.Frame):
@@ -119,14 +114,11 @@ class Footer(tk.Frame):
             self._send_callback()
 
     def _draw(self):
-        save_button = tk.Button(master=self, text="Send", width=20)
+        save_button = tk.Button(master=self, text="Send", width=20, fg='#063f02', bg='#c98a3e', font=('Mincho', 10, 'bold'))
         save_button.config(command=self.send_click)
-        '''# You must implement this.
-        # Here you must configure the button to bind its click to
-        # the send_click() function.'''
         save_button.pack(fill=tk.BOTH, side=tk.RIGHT, padx=5, pady=5)
 
-        self.footer_label = tk.Label(master=self, text="Ready.")
+        self.footer_label = tk.Label(master=self, text="Ready.", fg='#063f02', font=('Mincho', 10, 'bold'))
         self.footer_label.pack(fill=tk.BOTH, side=tk.LEFT, padx=5)
 
 
@@ -280,29 +272,6 @@ class MainApp(tk.Frame):
         finally:
             self.body.after(2000, self.body.clear_text_entry)
 
-    def _load_contacts(self):
-        friends = self.profile.friends
-        self.body.clear_contact_tree()
-        for friend in friends:
-            self.body.insert_contact(friend)
-
-    def _load_messages(self):
-        self.body.clear_entry_editor()
-        all_messages = sorted(self.profile.get_messages(), key=lambda item: item['timestamp'], reverse=True)
-        for message in all_messages:
-            if message['from_user'] == self.recipient:
-                self.body.insert_contact_message(message['entry'])
-            elif message['from_user'] == self.username and message['to_user'] == self.recipient:
-                self.body.insert_user_message(message['entry'])
-
-    def save_messages_locally(self, msg_inbox):
-        for message in msg_inbox:
-            new_msg = Message(entry=message['message'],
-                              timestamp=message['timestamp'],
-                              from_user=message['from'])
-            self.profile.add_msg(new_msg)
-            self.profile.save_profile(self.path)
-
     def close_file(self):
         self.body.clear_contact_tree()
         self.body.clear_text_entry()
@@ -311,35 +280,6 @@ class MainApp(tk.Frame):
         self.path = ""
         self.file_name = ""
         self.is_loaded = False
-
-    def send_message(self):
-        try:
-            message_to_send = self.body.get_text_entry()
-            if c.check_valid_entry(message_to_send):
-                self.publish(message_to_send)
-                new_post = Message(entry=message_to_send,
-                                   from_user=self.username,
-                                   to_user=self.recipient)
-                self.profile.add_msg(new_post)
-                self.profile.save_profile(self.path)
-        except c.InvalidEntry:
-            self.body.set_text_entry('Sending empty messages is not allowed.')
-            self.body.after(2000, self.body.clear_text_entry)
-
-    def publish(self, message: str):
-        try:
-            if (self.recipient == self.username) or (not self.recipient):
-                raise c.InvalidRecipient
-
-            if self.direct_messenger.send(message, self.recipient):
-                self.body.entry_editor.insert(tk.END, message, 'entry-right')
-                self.body.set_text_entry('Sent.')
-            else:
-                self.body.set_text_entry('Failed to send.')
-        except c.InvalidRecipient:
-            self.body.set_text_entry('Please select a recipient. Note: Sending messages to yourself is unsupported.')
-        finally:
-            self.body.after(3000, self.body.clear_text_entry)
 
     def add_contact(self):
         try:
@@ -372,13 +312,78 @@ class MainApp(tk.Frame):
         finally:
             self.body.after(3000, self.body.clear_text_entry)
 
+    def _load_contacts(self):
+        friends = self.profile.friends
+        self.body.clear_contact_tree()
+        for friend in friends:
+            self.body.insert_contact(friend)
+
     def recipient_selected(self, recipient):
         self.recipient = recipient
         self._load_messages()
-        new_inbox = self.body.after(2000, self.check_new)
-        if new_inbox != []:
+        self._refresh_messages()
+
+    def _load_messages(self):
+        self.check_new()
+        self.body.clear_entry_editor()
+        all_messages = sorted(self.profile.get_messages(), key=lambda item: item['timestamp'], reverse=True)
+        for message in all_messages:
+            if message['from_user'] == self.recipient:
+                self.body.insert_contact_message(message['entry'])
+            elif message['from_user'] == self.username and message['to_user'] == self.recipient:
+                self.body.insert_user_message(message['entry'])
+
+    def _refresh_messages(self):
+        if self.recipient:
             self._load_messages()
-        self.body.mainloop()
+            self.body.after(2000, self._refresh_messages)
+
+    def check_new(self):
+        try:
+            c.check_connection(self.is_connected)
+            inbox = self.direct_messenger.retrieve_new()
+            self.save_messages_locally(inbox)
+            return inbox
+        except c.NotConnected:
+            self.body.set_text_entry('Please load a profile. Then load a file to save your messages and contacts.')
+            self.body.after(3000, self.body.clear_text_entry)
+
+    def save_messages_locally(self, msg_inbox):
+        for message in msg_inbox:
+            new_msg = Message(entry=message['message'],
+                              timestamp=message['timestamp'],
+                              from_user=message['from'])
+            self.profile.add_msg(new_msg)
+            self.profile.save_profile(self.path)
+
+    def send_message(self):
+        try:
+            message_to_send = self.body.get_text_entry()
+            if c.check_valid_entry(message_to_send):
+                self.publish(message_to_send)
+                new_post = Message(entry=message_to_send,
+                                   from_user=self.username,
+                                   to_user=self.recipient)
+                self.profile.add_msg(new_post)
+                self.profile.save_profile(self.path)
+        except c.InvalidEntry:
+            self.body.set_text_entry('Sending empty messages is not allowed.')
+            self.body.after(2000, self.body.clear_text_entry)
+
+    def publish(self, message: str):
+        try:
+            if (self.recipient == self.username) or (not self.recipient):
+                raise c.InvalidRecipient
+
+            if self.direct_messenger.send(message, self.recipient):
+                self.body.entry_editor.insert(tk.END, message + '\n', 'entry-right')
+                self.body.set_text_entry('Sent.')
+            else:
+                self.body.set_text_entry('Failed to send.')
+        except c.InvalidRecipient:
+            self.body.set_text_entry('Please select a recipient. Note: Sending messages to yourself is unsupported.')
+        finally:
+            self.body.after(3000, self.body.clear_text_entry)
 
     def configure_server(self):
         try:
@@ -408,18 +413,7 @@ class MainApp(tk.Frame):
         finally:
             self.body.after(2000, self.body.clear_text_entry)
 
-    def check_new(self):
-        try:
-            c.check_connection(self.is_connected)
-            inbox = self.direct_messenger.retrieve_new()
-            self.save_messages_locally(inbox)
-            return inbox
-        except c.NotConnected:
-            self.body.set_text_entry('Please load a profile. Then load a file to save your messages and contacts.')
-            self.body.after(3000, self.body.clear_text_entry)
-
     def _draw(self):
-        # Build a menu and add it to the root frame.
         menu_bar = tk.Menu(self.root)
         self.root['menu'] = menu_bar
         menu_file = tk.Menu(menu_bar)
@@ -436,8 +430,6 @@ class MainApp(tk.Frame):
         settings_file.add_command(label='Configure DS Server',
                                   command=self.configure_server)
 
-        # The Body and Footer classes must be initialized and
-        # packed into the root window.
         self.body = Body(self.root,
                          recipient_selected_callback=self.recipient_selected)
         self.body.pack(fill=tk.BOTH, side=tk.TOP, expand=True)
@@ -446,37 +438,18 @@ class MainApp(tk.Frame):
 
 
 if __name__ == "__main__":
-    # All Tkinter programs start with a root window. We will name ours 'main'.
     main = tk.Tk()
 
-    # 'title' assigns a text value to the Title Bar area of a window.
-    main.title("ICS 32 Distributed Social Messenger")
-
-    # This is just an arbitrary starting point. You can change the value
-    # around to see how the starting size of the window changes.
+    main.title("We Won't Steal Your Data Messenger ;)")
     main.geometry("720x480")
 
-    # adding this option removes some legacy behavior with menus that
-    # some modern OSes don't support. If you're curious, feel free to comment
-    # out and see how the menu changes.
     main.option_add('*tearOff', False)
 
-    # Initialize the MainApp class, which is the starting point for the
-    # widgets used in the program. All of the classes that we use,
-    # subclass Tk.Frame, since our root frame is main, we initialize
-    # the class with it.
     app = MainApp(main)
 
-    # When update is called, we finalize the states of all widgets that
-    # have been configured within the root frame. Here, update ensures that
-    # we get an accurate width and height reading based on the types of widgets
-    # we have used. minsize prevents the root window from resizing too small.
-    # Feel free to comment it out and see how the resizing
-    # behavior of the window changes.
     main.update()
     main.minsize(main.winfo_width(), main.winfo_height())
     id = main.after(2000, app.check_new)
     print(id)
-    # And finally, start up the event loop for the program (you can find
-    # more on this in lectures of week 9 and 10).
+
     main.mainloop()
