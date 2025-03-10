@@ -276,6 +276,7 @@ class MainApp(tk.Frame):
         self.body.clear_contact_tree()
         self.body.clear_text_entry()
         self.body.clear_entry_editor()
+        self.recipient = ''
         self.profile = Profile()
         self.path = ""
         self.file_name = ""
