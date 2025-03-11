@@ -95,6 +95,10 @@ class DirectMessenger:
             return None
 
     def join(self):
+        '''
+        Joins a user to the server. Returns the join message
+        recieved by the server if successful. None otherwise.
+        '''
         try:
             if self.token is None:
                 self.token = ""
@@ -108,7 +112,8 @@ class DirectMessenger:
                 c.check_msg_type(dsp.get_msg_type(server_data))
                 active_token = dsp.get_token(server_data)
                 self.token = active_token
-                return dsp.get_server_message(server_data)
+                server_msg = dsp.get_server_message(server_data)
+                return server_msg
         except c.InvalidEntry:
             print('ERROR: Missing parameter(s).')
         except c.ErrorMessage:
@@ -117,6 +122,9 @@ class DirectMessenger:
             print(f"ERROR: {dsp_error}")
 
     def init_socket(self):
+        '''
+        Initilizes the socket and the protocol connection.
+        '''
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.connect((self.dsuserver, 3001))
@@ -134,6 +142,10 @@ class DirectMessenger:
         return False
 
     def get_response(self):
+        '''
+        Returns True if the message is accepted by server
+        and server message is type "ok". False otherwise.
+        '''
         try:
             server_data = dsp.read_data(dsp.read_msg(self.dsp_conn))
             c.check_msg_type(dsp.get_msg_type(server_data))
@@ -144,6 +156,11 @@ class DirectMessenger:
             return False
 
     def get_inbox(self):
+        '''
+        Returns the list of messages recieved by the server
+        if message recieved from server is of type "ok".
+        Returns None if the server message type is "error".
+        '''
         try:
             server_data = dsp.read_data(dsp.read_msg(self.dsp_conn))
             c.check_msg_type(dsp.get_msg_type(server_data))
@@ -155,4 +172,7 @@ class DirectMessenger:
             return None
 
     def close_socket(self):
+        '''
+        Call to close the socket.
+        '''
         self.dsp_conn.socket.close()
