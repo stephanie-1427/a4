@@ -106,6 +106,11 @@ def read_data(server_msg: str):
 
 def format_directmsg(user_token: str, dm_object):
     '''
+    Formats a dict message for direct messages.
+    Returns the formated dict.
+
+    :param user_token: The current token for the session.
+    :param dm_object: An object of type DirectMessage from the ds_messenger module
     '''
     msg_dict = {"token": user_token, "directmessage": {"entry": dm_object.message,
                                                        "recipient": dm_object.recipient,
@@ -115,6 +120,10 @@ def format_directmsg(user_token: str, dm_object):
 
 def format_new(user_token: str):
     '''
+    Formats a dict message for retreiving new messages.
+    Returns the formated dict.
+
+    :param user_token: The current token for the session.
     '''
     new_dict = {"token": user_token, "directmessage": "new"}
     return new_dict
@@ -122,6 +131,10 @@ def format_new(user_token: str):
 
 def format_all(user_token: str):
     '''
+    Formats a dict message for retreiving all messages.
+    Returns the formated dict.
+
+    :param user_token: The current token for the session.
     '''
     all_dict = {"token": user_token, "directmessage": "all"}
     return all_dict
