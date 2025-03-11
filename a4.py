@@ -406,9 +406,9 @@ class MainApp(tk.Frame):
             welcome_msg = self.direct_messenger.start_session()
 
             if welcome_msg is False:
-                self.body.set_text_entry(f'Wrong password for {self.username}')
-            elif welcome_msg is None:
                 self.body.set_text_entry('A bad server was entered')
+            elif welcome_msg is None:
+                self.body.set_text_entry(f'Wrong password for {self.username}')
             else:
                 self.body.set_text_entry(f'{welcome_msg} Load a file to get started.')
                 self.is_connected = True

@@ -21,7 +21,6 @@ class DSProtocolError(Exception):
     '''
     Error for when the socket fails to connect
     '''
-    pass
 
 
 def extract_json(json_msg: str) -> DataTuple:

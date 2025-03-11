@@ -30,28 +30,36 @@ def test_start_session():
     assert dm_obj.dsp_conn != None
     dm_obj._close_socket()
 
+    dm_obj2 = dsm.DirectMessenger("badserver", "testingdm", "using pytest")
+    assert isinstance(dm_obj2, dsm.DirectMessenger)
+    assert dm_obj2.token == None
+    assert dm_obj2.dsp_conn == None
+
+    welcome_message = dm_obj2.start_session()
+    assert welcome_message == False
+
 def test_join_exceptions():
     # Missing username
     no_user_dm_obj = dsm.DirectMessenger()
     assert no_user_dm_obj.username == None
-    assert no_user_dm_obj._join() == False
+    assert no_user_dm_obj._join() == None
 
     # Missing password
     no_pwd_dm_obj = dsm.DirectMessenger()
     no_pwd_dm_obj.username = "NoPassword"
     assert no_pwd_dm_obj.password == None
-    assert no_pwd_dm_obj._join() == False
+    assert no_pwd_dm_obj._join() == None
 
     # Server error messages (invalid password)
     dm_test_obj_1 = dsm.DirectMessenger("127.0.0.1", "testingdm", "incorrectpassword")
     assert dm_test_obj_1._init_socket() == True
-    assert dm_test_obj_1._join() == False
+    assert dm_test_obj_1._join() == None
 
     # dsp.DSProtocolError (missing ds_conn)
     dm_test_obj_3 = dsm.DirectMessenger("127.0.0.1", "someuser", "BOOM")
-    assert dm_test_obj_3._join() == False
+    assert dm_test_obj_3._join() == None
 
-def test_init_socket_exceptions(): #questions about ConnectionRefusedError and dsp.DSProtocolError
+def test_init_socket_exceptions():
     # dsuserver is None
     dm_test_obj_4 = dsm.DirectMessenger()
     assert dm_test_obj_4.dsuserver == None

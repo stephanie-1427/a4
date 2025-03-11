@@ -1,10 +1,23 @@
-import ds_protocol as dsp
-import checker as c
+'''
+ds_messenger.py
+
+Handles the client side of the program
+
+Stephanie Lee
+stephl25@uci.edu
+79834162
+'''
 import socket
 import time
+import ds_protocol as dsp
+import checker as c
 
 
 class DirectMessage:
+    '''
+    A DirectMessage object is created to store data needed for
+    sending data to the server for directmessage command.
+    '''
     def __init__(self):
         self.recipient = None
         self.message = None
@@ -12,6 +25,10 @@ class DirectMessage:
 
 
 class DirectMessenger:
+    '''
+    The message sending functionality. An object of DirectMessenger created
+    to establish a connection to the server and send messages to the server.
+    '''
     def __init__(self, dsuserver=None, username=None, password=None):
         self.token = None
         self.dsp_conn = None
@@ -20,10 +37,28 @@ class DirectMessenger:
         self.password = password
 
     def start_session(self):
-        if self._init_socket():
+        '''
+        Initializes the socket connection (DSConnection) in ds_protocol.
+        And joins the user to the server.
+
+        Returns the server message if joining the user is successful.
+        Returns False otherwise.
+        '''
+        connection_established = self._init_socket()
+        if connection_established:
             return self._join()
+        return connection_established
 
     def send(self, message: str, recipient: str) -> bool:
+        '''
+        Sends a message to the recipient by creating a DirectMessage instance,
+        passing it to protocol to format the message, and calling dsp.write to
+        send the message to the server. Returns True is the message is
+        successfully sent. False otherwise.
+
+        :param recipient: The username of the user to send the message to.
+        :param message: The message to be sent to the recipient
+        '''
         try:
             dm = DirectMessage()
             dm.recipient = recipient
@@ -36,6 +71,10 @@ class DirectMessenger:
             return False
 
     def retrieve_new(self) -> list:
+        '''
+        Sends a formated retreive new message to the server and returns the
+        list of new messages sent to the user.
+        '''
         try:
             dsp.write(self.dsp_conn, dsp.format_new(self.token))
             return self._get_inbox()
@@ -44,6 +83,10 @@ class DirectMessenger:
             return None
 
     def retrieve_all(self) -> list:
+        '''
+        Sends a formated retreive all message to the server and returns the
+        list of all messages sent to the user.
+        '''
         try:
             dsp.write(self.dsp_conn, dsp.format_all(self.token))
             return self._get_inbox()
@@ -72,7 +115,6 @@ class DirectMessenger:
             print(f'ERROR: {dsp.get_server_message(server_data)}')
         except dsp.DSProtocolError as dsp_error:
             print(f"ERROR: {dsp_error}")
-        return False
 
     def _init_socket(self):
         try:
