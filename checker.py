@@ -1,42 +1,67 @@
-# checker.py
+'''
+checker.py
 
-# Error checking functions
-# Custom Exceptions
+Error checking functions
+Custom Exceptions
 
-# Stephanie Lee
-# stephl25@uci.edu
-# 79834162
+Stephanie Lee
+stephl25@uci.edu
+79834162
+'''
 
 from pathlib import Path
 from Profile import Profile
 
 
 class ErrorMessage(Exception):
-    pass
+    '''
+    Custom Exception when the server returns a message
+    with type 'error'.
+    '''
 
 
 class InvalidEntry(Exception):
-    pass
+    '''
+    Custom Exception when the entry is invalid according
+    to some conditions.
+    '''
 
 
 class InvalidRecipient(Exception):
-    pass
+    '''
+    Custom Exception for when the selected contact to send
+    a message to is invalid (same as current user).
+    '''
 
 
 class NotConnected(Exception):
-    pass
+    '''
+    Custom Exception raised when a client is not connected
+    to a server or a file is not loaded.
+    '''
 
 
 class CancelledEvent(Exception):
-    pass
+    '''
+    Custom Exception that is raised when an event
+    in the GUI is cancelled.
+    '''
 
 
 class AlreadyExistsError(Exception):
-    pass
+    '''
+    Custom Exception for when a contact is added, but it
+    already exists. Ensures no duplicate contacts are
+    added.
+    '''
 
 
 class Mismatched(Exception):
-    pass
+    '''
+    Custom Exception for when usernames and/or passwords
+    fail to match between active profile and stored profile
+    in local file.
+    '''
 
 
 def check_msg_type(msg: str) -> None:
@@ -58,13 +83,10 @@ def check_valid_entry(entry) -> bool:
 
     :param entry: A string or NoneType entry.
     '''
-    if entry is not None and type(entry) is str:
+    if entry is not None and isinstance(entry, str):
         if len(entry) != 0 and not entry.isspace():
             return True
-        else:
-            raise InvalidEntry
-    else:
-        raise InvalidEntry
+    raise InvalidEntry
 
 
 def check_existence(path: str) -> None:
@@ -88,7 +110,7 @@ def check_suffix(path: str) -> None:
     '''
     p = Path(path)
     suffix = '.dsu'
-    if not p.suffix == suffix:
+    if p.suffix != suffix:
         # File type exception
         raise TypeError
 

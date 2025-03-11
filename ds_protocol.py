@@ -1,8 +1,12 @@
-# ds_protocol.py
+'''
+ds_protocol.py
 
-# Stephanie Lee
-# stephl25@uci.edu
-# 79834162
+Client-side protocl
+
+Stephanie Lee
+stephl25@uci.edu
+79834162
+'''
 
 import json
 from collections import namedtuple
