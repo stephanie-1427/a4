@@ -1,4 +1,4 @@
-Author: Stephanie Lee
+Author: Stephanie Lee##
 Contributors: ICS32 staff
 Last Updated: 2025
 
