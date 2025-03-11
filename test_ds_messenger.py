@@ -11,6 +11,7 @@ stephl25@uci.edu
 '''
 import ds_messenger as dsm
 
+
 def test_direct_messenger_init():
     '''
     Tests the instantiation of the DirectMessenger class.
@@ -30,6 +31,7 @@ def test_direct_messenger_init():
     assert dm_obj.dsuserver == "127.0.0.1"
     assert dm_obj.username == "testingdm"
     assert dm_obj.password == "using unittest"
+
 
 def test_start_session():
     '''
@@ -55,6 +57,7 @@ def test_start_session():
     welcome_message = dm_obj2.start_session()
     assert welcome_message is False
 
+
 def test_join_exceptions():
     '''
     Tests the _join() method exceptions are triggering correctly.
@@ -79,6 +82,7 @@ def test_join_exceptions():
     dm_test_obj_3 = dsm.DirectMessenger("127.0.0.1", "someuser", "BOOM")
     assert dm_test_obj_3.join() is None
 
+
 def test_init_socket_exceptions():
     '''
     Tests the _init_socket exceptions are being triggered correctly.
@@ -95,6 +99,7 @@ def test_init_socket_exceptions():
     # dsuserver is "badaddress"
     dm_test_obj_4.dsuserver = "badaddress"
     assert dm_test_obj_4.init_socket() is False
+
 
 def test_send():
     '''
@@ -116,6 +121,7 @@ def test_send():
     is_ok = dm_test_obj_1.send("Hello temp_user!", "temp_user")
     assert is_ok is True
 
+
 def test_retrieve_new():
     '''
     Tests retrieve_new() function of ds_messenger.py
@@ -133,6 +139,7 @@ def test_retrieve_new():
     if len(inbox) != 0:
         assert inbox[-1]['message'] == "Hello temp_user!"
         assert inbox[-1]['from'] == "testingdm"
+
 
 def test_retrieve_all():
     '''
@@ -161,6 +168,7 @@ def test_retrieve_all():
     assert inbox[-1]['message'] == "Hello to you too, testingdm"
     assert inbox[-1]['from'] == "temp_user"
 
+
 def test_get_inbox_exception():
     '''
     Tests Exceptions in get_inbox() are being thrown and handled correctly.
@@ -172,6 +180,7 @@ def test_get_inbox_exception():
     inbox = dm_test_obj_1.retrieve_all()
     assert inbox is None
 
+
 def test_get_response_exception():
     '''
     Tests Exceptions in get_response() are being thrown and handled correctly.
@@ -179,6 +188,7 @@ def test_get_response_exception():
     dm_test_obj_1 = dsm.DirectMessenger("127.0.0.1", "testingdm", "using unittest")
     dm_test_obj_1.start_session()
     dm_test_obj_1.send("A message to a non-existent user", "A non-existent user")
+
 
 if __name__ == "__main__":
     test_direct_messenger_init()
