@@ -72,7 +72,7 @@ class DirectMessenger:
 
     def retrieve_new(self) -> list:
         '''
-        Sends a formated retreive new message to the server and returns the
+        Sends a formated retrieve new message to the server and returns the
         list of new messages sent to the user.
         '''
         try:
@@ -84,7 +84,7 @@ class DirectMessenger:
 
     def retrieve_all(self) -> list:
         '''
-        Sends a formated retreive all message to the server and returns the
+        Sends a formated retrieve all message to the server and returns the
         list of all messages sent to the user.
         '''
         try:
@@ -97,7 +97,7 @@ class DirectMessenger:
     def join(self):
         '''
         Joins a user to the server. Returns the join message
-        recieved by the server if successful. None otherwise.
+        received by the server if successful. None otherwise.
         '''
         try:
             if self.token is None:
@@ -157,7 +157,7 @@ class DirectMessenger:
 
     def get_inbox(self):
         '''
-        Returns the list of messages recieved by the server
+        Returns the list of messages received by the server
         if message recieved from server is of type "ok".
         Returns None if the server message type is "error".
         '''

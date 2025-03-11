@@ -1,6 +1,6 @@
 import pytest
-import ds_protocol as dsp
 import socket
+import ds_protocol as dsp
 
 # mirrors DirectMessage class of ds_messenger.py
 class DirectMessage():
