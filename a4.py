@@ -484,7 +484,7 @@ class MainApp(tk.Frame):
             inbox = self.direct_messenger.retrieve_new()
             self.save_messages_locally(inbox)
         except c.NotConnected:
-            self.body.set_text_entry('Log in. Then load a file to save your messages and contacts.')
+            self.body.set_text_entry('To log in: Settings, Configure DS Server')
             self.body.after(3000, self.body.clear_text_entry)
 
     def save_messages_locally(self, msg_inbox):
@@ -570,12 +570,13 @@ class MainApp(tk.Frame):
             elif welcome_msg is None:
                 self.body.set_text_entry(f'Wrong password for {self.username}')
             else:
-                self.body.set_text_entry(f'{welcome_msg} Load a file to get started.')
+                next_instructions = "To get started: (1) Select File (2) Create/Open a file."
+                self.body.set_text_entry(f'{welcome_msg}\n{next_instructions}')
                 self.is_connected = True
         except c.CancelledEvent:
             self.body.set_text_entry('Cancelled loading a profile.')
         finally:
-            self.body.after(2000, self.body.clear_text_entry)
+            self.body.after(3000, self.body.clear_text_entry)
 
     def _draw(self):
         '''
