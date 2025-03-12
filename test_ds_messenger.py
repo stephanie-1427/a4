@@ -190,6 +190,24 @@ def test_get_response_exception():
     dm_test_obj_1.send("A message to a non-existent user", "A non-existent user")
 
 
+def test_direct_message_class():
+    '''
+    Tests the functionality of the DirectMessage class is
+    working properly and returning the correct types and values.
+    '''
+    dm_obj = dsm.DirectMessage()
+    dm_obj.set_recipient("recipient")
+    dm_obj.set_message("new message")
+    dm_obj.create_timestamp()
+
+    assert isinstance(dm_obj.recipient, str)
+    assert isinstance(dm_obj.message, str)
+    assert isinstance(dm_obj.timestamp, float)
+
+    assert dm_obj.recipient == "recipient"
+    assert dm_obj.message == "new message"
+
+
 if __name__ == "__main__":
     test_direct_messenger_init()
     test_start_session()
@@ -200,3 +218,4 @@ if __name__ == "__main__":
     test_retrieve_new()
     test_retrieve_all()
     test_get_inbox_exception()
+    test_direct_message_class()

@@ -566,7 +566,7 @@ class MainApp(tk.Frame):
             welcome_msg = self.direct_messenger.start_session()
 
             if welcome_msg is False:
-                self.body.set_text_entry('A bad server was entered')
+                self.body.set_text_entry('Server not connected.')
             elif welcome_msg is None:
                 self.body.set_text_entry(f'Wrong password for {self.username}')
             else:

@@ -23,6 +23,38 @@ class DirectMessage:
         self.message = None
         self.timestamp = None
 
+    def set_recipient(self, new_recipient: str) -> None:
+        '''
+        Set the recipient to param new_recipient.
+
+        :param new_recipient: Updated recipient.
+        '''
+        self.recipient = new_recipient
+
+    def set_message(self, new_message: str) -> None:
+        '''
+        Set the message to param new_message.
+
+        :param new_message: Updated message.
+        '''
+        self.message = new_message
+
+    def set_timestamp(self, new_timestamp: float) -> None:
+        '''
+        Set the timestampe to param new_timestamp.
+
+        :param new_timestamp: Updated timestamp.
+        '''
+        self.timestamp = new_timestamp
+
+    def create_timestamp(self) -> None:
+        '''
+        Create a new timestamp and set it as the
+        current timestamp.
+        '''
+        marked_time = time.time()
+        self.set_timestamp(marked_time)
+
 
 class DirectMessenger:
     '''
@@ -61,9 +93,9 @@ class DirectMessenger:
         '''
         try:
             dm = DirectMessage()
-            dm.recipient = recipient
-            dm.message = message
-            dm.timestamp = time.time()
+            dm.set_recipient(recipient)
+            dm.set_message(message)
+            dm.create_timestamp()
             dsp.write(self.dsp_conn, dsp.format_directmsg(self.token, dm))
             return self.get_response()
         except dsp.DSProtocolError as dsp_error:
@@ -135,8 +167,6 @@ class DirectMessenger:
             print('ERROR: Connection refused.')
         except socket.gaierror as s:
             print(f'ERROR: Address-related error: {s}')
-        except dsp.DSProtocolError as dsp_error:
-            print(f'ERROR: {dsp_error}')
         else:
             return True
         return False
