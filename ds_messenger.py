@@ -164,6 +164,7 @@ class DirectMessenger:
         except TypeError:
             print('ERROR: Parameter(s) of unexpected types.')
         except ConnectionRefusedError:
+            # Only raised when no server is being run
             print('ERROR: Connection refused.')
         except socket.gaierror as s:
             print(f'ERROR: Address-related error: {s}')
