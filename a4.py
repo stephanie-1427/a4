@@ -513,8 +513,8 @@ class MainApp(tk.Frame):
             if c.check_valid_entry(message_to_send):
                 if self.publish(message_to_send):
                     new_post = Message(entry=message_to_send,
-                                    from_user=self.username,
-                                    to_user=self.recipient)
+                                       from_user=self.username,
+                                       to_user=self.recipient)
                     self.profile.add_msg(new_post)
                     self.profile.save_profile(self.path)
         except c.InvalidEntry:
@@ -529,7 +529,7 @@ class MainApp(tk.Frame):
         Sends the message to the server and receives a message
         from the server. Returns True if the send() returns True.
         Returns False if send() returns False or a invalid
-        recipient is selected (user selects themselves or a 
+        recipient is selected (user selects themselves or a
         recipient is not selected).
         '''
         try:
