@@ -1,19 +1,30 @@
-# Stephanie Lee
-# stephl25@uci.edu
-# 79834162
+'''
+a4.py
 
-# TODO: keep debugging
+Starting point of the program (the client).
+Establishes and formats the GUI, calling functions
+from outside modules when an event occurs.
+
+Stephanie Lee
+stephl25@uci.edu
+79834162
+'''
 
 import tkinter as tk
 from tkinter import ttk, filedialog, simpledialog
 from typing import Text
+from pathlib import Path
 from ds_messenger import DirectMessenger
 from Profile import Profile, Message, DsuFileError, DsuProfileError
 import checker as c
-from pathlib import Path
 
 
 class Body(tk.Frame):
+    '''
+    GUI for the main body of the application, which includes
+    the text box to send messages, the text box that displays messages,
+    and the contact list.
+    '''
     def __init__(self, root, recipient_selected_callback=None):
         tk.Frame.__init__(self, root)
         self.root = root
@@ -23,6 +34,10 @@ class Body(tk.Frame):
         self._draw()
 
     def node_select(self, event):
+        '''
+        When a contact is selected in the TreeView select,
+        return that selection.
+        '''
         if self.posts_tree.selection():
             index = int(self.posts_tree.selection()[0])
             entry = self._contacts[index]
@@ -30,40 +45,72 @@ class Body(tk.Frame):
                 self._select_callback(entry)
 
     def insert_contact(self, contact: str):
+        '''
+        Inserts a contact into the TreeView.
+        '''
         self._contacts.append(contact)
-        id = len(self._contacts) - 1
-        self._insert_contact_tree(id, contact)
+        contact_id = len(self._contacts) - 1
+        self._insert_contact_tree(contact_id, contact)
 
-    def _insert_contact_tree(self, id, contact: str):
+    def _insert_contact_tree(self, index, contact: str):
+        '''
+        Displays the TreeView of contacts.
+        '''
         if len(contact) > 25:
             entry = contact[:24] + "..."
-        id = self.posts_tree.insert('', id, id, text=contact)
+        index = self.posts_tree.insert('', index, index, text=contact)
 
     def insert_user_message(self, message: str):
+        '''
+        Inserts a user's sent message into the text box that
+        displays messages.
+        '''
         self.entry_editor.insert(1.0, message + '\n', 'entry-right')
 
     def insert_contact_message(self, message: str):
+        '''
+        Inserts a contact's sent message into the text box that
+        displays messages.
+        '''
         self.entry_editor.insert(1.0, message + '\n', 'entry-left')
 
     def get_text_entry(self) -> str:
+        '''
+        Returns the text written in the text editor widget.
+        '''
         return self.message_editor.get('1.0', 'end').rstrip()
 
     def set_text_entry(self, text: str):
+        '''
+        Writes the parameter text into the text editor.
+        '''
         self.message_editor.delete(1.0, tk.END)
         self.message_editor.insert(1.0, text, 'make-it-pretty')
 
     def clear_text_entry(self):
+        '''
+        Clears the text editor.
+        '''
         self.message_editor.delete(1.0, tk.END)
 
     def clear_entry_editor(self):
+        '''
+        Clears the text box that displays messages.
+        '''
         self.entry_editor.delete(1.0, tk.END)
 
     def clear_contact_tree(self):
+        '''
+        Clears the TreeView.
+        '''
         to_delete = self.posts_tree.get_children()
         for tree_child in to_delete:
             self.posts_tree.delete(tree_child)
 
     def _draw(self):
+        '''
+        Draws the GUI Body into the application.
+        '''
         posts_frame = tk.Frame(master=self, bg='#063f02', width=250)
         posts_frame.pack(fill=tk.BOTH, side=tk.LEFT)
 
@@ -85,13 +132,19 @@ class Body(tk.Frame):
         message_frame.pack(fill=tk.BOTH, side=tk.TOP, expand=False)
 
         self.message_editor = tk.Text(message_frame, width=0, height=5)
-        self.message_editor.tag_configure('make-it-pretty', foreground='#063f02', font=('Mincho', 10, 'bold'))
+        self.message_editor.tag_configure('make-it-pretty',
+                                          foreground='#063f02',
+                                          font=('Mincho', 10, 'bold'))
         self.message_editor.pack(fill=tk.BOTH, side=tk.LEFT,
                                  expand=True, padx=5, pady=5)
 
         self.entry_editor = tk.Text(editor_frame, width=0, height=5)
-        self.entry_editor.tag_configure('entry-right', justify='right', background='#c98a3e', font=('Mincho', 10, 'bold'))
-        self.entry_editor.tag_configure('entry-left', justify='left', background='#eeab50', font=('Mincho', 10, 'bold'))
+        self.entry_editor.tag_configure('entry-right', justify='right',
+                                        background='#c98a3e',
+                                        font=('Mincho', 10, 'bold'))
+        self.entry_editor.tag_configure('entry-left', justify='left',
+                                        background='#eeab50',
+                                        font=('Mincho', 10, 'bold'))
         self.entry_editor.pack(fill=tk.BOTH, side=tk.LEFT,
                                expand=True, padx=5, pady=5)
 
@@ -103,6 +156,11 @@ class Body(tk.Frame):
 
 
 class Footer(tk.Frame):
+    '''
+    GUI for the Footer of the application, which consists of the
+    "Ready." message in the lower left corner and the "Send" button
+    in the lower right corner.
+    '''
     def __init__(self, root, send_callback=None):
         tk.Frame.__init__(self, root)
         self.root = root
@@ -110,19 +168,34 @@ class Footer(tk.Frame):
         self._draw()
 
     def send_click(self):
+        '''
+        Send the message to the recipient when the send button
+        is clicked.
+        '''
         if self._send_callback is not None:
             self._send_callback()
 
     def _draw(self):
-        save_button = tk.Button(master=self, text="Send", width=20, fg='#063f02', bg='#c98a3e', font=('Mincho', 10, 'bold'))
+        '''
+        Draws the GUI for the Footer.
+        '''
+        save_button = tk.Button(master=self, text="Send", width=20,
+                                fg='#063f02', bg='#c98a3e',
+                                font=('Mincho', 10, 'bold'))
         save_button.config(command=self.send_click)
         save_button.pack(fill=tk.BOTH, side=tk.RIGHT, padx=5, pady=5)
 
-        self.footer_label = tk.Label(master=self, text="Ready.", fg='#063f02', font=('Mincho', 10, 'bold'))
+        self.footer_label = tk.Label(master=self, text="Ready.",
+                                     fg='#063f02',
+                                     font=('Mincho', 10, 'bold'))
         self.footer_label.pack(fill=tk.BOTH, side=tk.LEFT, padx=5)
 
 
 class NewContactDialog(tk.simpledialog.Dialog):
+    '''
+    simledialog for "Configure DS Server"
+    Collects a dsuserver, username, and password from the user.
+    '''
     def __init__(self, root, title=None, user=None, pwd=None, server=None):
         self.root = root
         self.server = server
@@ -131,6 +204,10 @@ class NewContactDialog(tk.simpledialog.Dialog):
         super().__init__(root, title)
 
     def body(self, frame):
+        '''
+        Draws the GUI for the main body of "Configure DS Server," and
+        retreives entries.
+        '''
         self.server_label = tk.Label(frame, width=30, text="DS Server Address")
         self.server_label.pack()
         self.server_entry = tk.Entry(frame, width=30)
@@ -151,12 +228,19 @@ class NewContactDialog(tk.simpledialog.Dialog):
         self.password_entry.pack()
 
     def apply(self):
+        '''
+        Assigns attributes to their respective entries.
+        '''
         self.user = self.username_entry.get()
         self.pwd = self.password_entry.get()
         self.server = self.server_entry.get()
 
 
 class NewFileDialog(tk.simpledialog.Dialog):
+    '''
+    simledialog for "Configure New File" when "File" then "New"
+    is selected. A directory and file name are collected.
+    '''
     def __init__(self, root, title=None, path=None, file_name=None):
         self.root = root
         self.path = path
@@ -164,6 +248,10 @@ class NewFileDialog(tk.simpledialog.Dialog):
         super().__init__(root, title)
 
     def body(self, frame):
+        '''
+        Draws the GUI for the main body of "Configure New File," and
+        retreives entries.
+        '''
         self.path_label = tk.Label(frame, width=30, text="Directory to create the new file in")
         self.path_label.pack()
         self.path_entry = tk.Entry(frame, width=50)
@@ -177,11 +265,19 @@ class NewFileDialog(tk.simpledialog.Dialog):
         self.file_name_entry.pack()
 
     def apply(self):
+        '''
+        Assigns attributes to their respective entries.
+        '''
         self.path = self.path_entry.get()
         self.file_name = self.file_name_entry.get()
 
 
 class MainApp(tk.Frame):
+    '''
+    The main application of the GUI that handles functionality
+    and usage. Uses external classes to draw additional parts of
+    the GUI and provide events.
+    '''
     def __init__(self, root):
         tk.Frame.__init__(self, root)
         self.root = root
@@ -201,6 +297,11 @@ class MainApp(tk.Frame):
         self._draw()
 
     def configure_file(self):
+        '''
+        Creates and opens a new file with specified file name in the
+        specified directory. If the file already exists in the
+        specified directory, the file is opened.
+        '''
         try:
             c.check_connection(self.is_connected)
             self.close_file()
@@ -234,13 +335,18 @@ class MainApp(tk.Frame):
         except c.CancelledEvent:
             self.body.set_text_entry('Cancelled creating a new file.')
         except c.Mismatched:
-            self.body.set_text_entry('Failed to open file. File info must match the current profile.')
+            self.body.set_text_entry('Open file failed: File profile must match the current user.')
         except FileNotFoundError:
-            self.body.set_text_entry('Could not find file/directory. Check the correctness of the directory.')
+            self.body.set_text_entry('File not found. Check the correctness of the directory.')
         finally:
             self.body.after(3000, self.body.clear_text_entry)
 
     def open_file(self):
+        '''
+        Opens the file selected by the user. Can only open files of .dsu types
+        and the profile saved in the file must exist and match the client
+        profile connected to the server. Exceptions are raised otherwise.
+        '''
         try:
             self.close_file()
             self.path = filedialog.askopenfilename()
@@ -273,6 +379,11 @@ class MainApp(tk.Frame):
             self.body.after(2000, self.body.clear_text_entry)
 
     def close_file(self):
+        '''
+        Clears all text boxes, the contact TreeView, and sets
+        object attributes related to loading a file
+        back to default values.
+        '''
         self.body.clear_contact_tree()
         self.body.clear_text_entry()
         self.body.clear_entry_editor()
@@ -283,11 +394,18 @@ class MainApp(tk.Frame):
         self.is_loaded = False
 
     def add_contact(self):
+        '''
+        Prompts the user for the username of the new contact to add.
+        Adds the contact to the list of friends stored in the Profile
+        object of the file loaded. Cannot add a contact that already
+        exists or a contact that has the same as the username of
+        the user who is connected to the server.
+        '''
         try:
             c.check_connection(self.is_connected)
             c.check_connection(self.is_loaded)
 
-            new_contact = simpledialog.askstring(title="New Contact", prompt="Enter:",)
+            new_contact = simpledialog.askstring(title="New Contact", prompt="Enter a username:",)
 
             c.check_cancel(new_contact)
             if new_contact in self.profile.friends:
@@ -301,7 +419,7 @@ class MainApp(tk.Frame):
                 self.profile.save_profile(self.path)
             self.body.set_text_entry(f"New contact entered: {new_contact}")
         except c.NotConnected:
-            self.body.set_text_entry('Please log in then open a file.')
+            self.body.set_text_entry('Please log in, then open a file.')
         except c.CancelledEvent:
             self.body.set_text_entry("Cancelled adding contact.")
         except c.AlreadyExistsError:
@@ -312,20 +430,35 @@ class MainApp(tk.Frame):
             self.body.after(3000, self.body.clear_text_entry)
 
     def _load_contacts(self):
+        '''
+        Displays the contact TreeView for the list of
+        friends/contacts in the profile object stored in the
+        loaded file.
+        '''
         friends = self.profile.friends
         self.body.clear_contact_tree()
         for friend in friends:
             self.body.insert_contact(friend)
 
     def recipient_selected(self, recipient):
+        '''
+        Assigns the recipient selected to self.recipient. Calls
+        necessary functions to display message log for that recipient.
+        '''
         self.recipient = recipient
         self._load_messages()
         self._refresh_messages()
 
     def _load_messages(self):
+        '''
+        Updates the inbox and displays the message log for
+        the selected contact to the text box.
+        '''
         self.check_new()
         self.body.clear_entry_editor()
-        all_messages = sorted(self.profile.get_messages(), key=lambda item: item['timestamp'], reverse=True)
+        all_messages = sorted(self.profile.get_messages(),
+                              key=lambda item: item['timestamp'],
+                              reverse=True)
         for message in all_messages:
             if message['from_user'] == self.recipient:
                 self.body.insert_contact_message(message['entry'])
@@ -333,21 +466,32 @@ class MainApp(tk.Frame):
                 self.body.insert_user_message(message['entry'])
 
     def _refresh_messages(self):
+        '''
+        Recursive function that checks for new messages every 2 seconds.
+        '''
         if self.recipient:
             self._load_messages()
             self.body.after(2000, self._refresh_messages)
 
     def check_new(self):
+        '''
+        Checks for new messages by calling retrieve_new()
+        and returning the list of new messages received by
+        the server.
+        '''
         try:
             c.check_connection(self.is_connected)
             inbox = self.direct_messenger.retrieve_new()
             self.save_messages_locally(inbox)
-            return inbox
         except c.NotConnected:
-            self.body.set_text_entry('Please load a profile. Then load a file to save your messages and contacts.')
+            self.body.set_text_entry('Log in. Then load a file to save your messages and contacts.')
             self.body.after(3000, self.body.clear_text_entry)
 
     def save_messages_locally(self, msg_inbox):
+        '''
+        Stores messages received by the server locally in
+        the file currently loaded.
+        '''
         for message in msg_inbox:
             new_msg = Message(entry=message['message'],
                               timestamp=message['timestamp'],
@@ -356,6 +500,12 @@ class MainApp(tk.Frame):
             self.profile.save_profile(self.path)
 
     def send_message(self):
+        '''
+        Checks the connection to the server and a file is
+        oepned. Checks the message (does not send if message is
+        empty or whitespace) and calls publish if the message is valid.
+        Stores the sent message to the file loaded.
+        '''
         try:
             c.check_connection(self.is_loaded)
             c.check_connection(self.is_connected)
@@ -375,6 +525,13 @@ class MainApp(tk.Frame):
             self.body.after(2000, self.body.clear_text_entry)
 
     def publish(self, message: str) -> bool:
+        '''
+        Sends the message to the server and receives a message
+        from the server. Returns True if the send() returns True.
+        Returns False if send() returns False or a invalid
+        recipient is selected (user selects themselves or a 
+        recipient is not selected).
+        '''
         try:
             if (self.recipient == self.username) or (not self.recipient):
                 raise c.InvalidRecipient
@@ -383,13 +540,16 @@ class MainApp(tk.Frame):
                 self.body.entry_editor.insert(tk.END, message + '\n', 'entry-right')
                 self.body.set_text_entry('Sent.')
                 return True
-            else:
-                self.body.set_text_entry('Failed to send.')
+            self.body.set_text_entry('Failed to send.')
         except c.InvalidRecipient:
-            self.body.set_text_entry('Please select a recipient. Note: Sending messages to yourself is unsupported.')
+            self.body.set_text_entry('Select a recipient. Unable to send messages to yourself.')
         return False
 
     def configure_server(self):
+        '''
+        Connects the user to the server using the information
+        they provided in the simpledialog.
+        '''
         try:
             ud = NewContactDialog(self.root, "Configure Account",
                                   self.username, self.password, self.server)
@@ -418,6 +578,10 @@ class MainApp(tk.Frame):
             self.body.after(2000, self.body.clear_text_entry)
 
     def _draw(self):
+        '''
+        Draws the GUI with the help of external classes
+        Body and Footer.
+        '''
         menu_bar = tk.Menu(self.root)
         self.root['menu'] = menu_bar
         menu_file = tk.Menu(menu_bar)
@@ -453,7 +617,7 @@ if __name__ == "__main__":
 
     main.update()
     main.minsize(main.winfo_width(), main.winfo_height())
-    id = main.after(2000, app.check_new)
-    print(id)
+    after_id = main.after(2000, app.check_new)
+    print(after_id)
 
     main.mainloop()
