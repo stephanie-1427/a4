@@ -8,7 +8,7 @@ Original Author: Mark S. Baldwin, modified by Alberto Krone-Martins
 Edited for ICS 32 a4 project use by:
 Stephanie Lee
 stephl25@uci.edu
-79834162
+
 '''
 # No pylint catching for the file naming of Profile.py
 # pylint: disable=invalid-name

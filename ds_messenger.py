@@ -5,7 +5,7 @@ Handles the client side of the program
 
 Stephanie Lee
 stephl25@uci.edu
-79834162
+
 '''
 import socket
 import time

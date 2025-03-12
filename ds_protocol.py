@@ -5,7 +5,7 @@ Client-side protocl
 
 Stephanie Lee
 stephl25@uci.edu
-79834162
+
 '''
 
 import json

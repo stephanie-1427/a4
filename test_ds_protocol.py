@@ -5,7 +5,7 @@ Tests the functionality of ds_protocol.py
 
 Stephanie Lee
 stephl25@uci.edu
-79834162
+
 '''
 import socket
 import pytest

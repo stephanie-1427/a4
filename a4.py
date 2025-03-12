@@ -7,7 +7,7 @@ from outside modules when an event occurs.
 
 Stephanie Lee
 stephl25@uci.edu
-79834162
+
 '''
 
 import tkinter as tk

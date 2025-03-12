@@ -7,7 +7,7 @@ in ds_messenger module. Does not test for server-related errors
 
 Stephanie Lee
 stephl25@uci.edu
-79834162
+
 '''
 import ds_messenger as dsm
 
